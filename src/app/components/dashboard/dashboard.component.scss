@@ -1,0 +1,56 @@
+.dashboard-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .dashboard-card {
+    padding: 20px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-title {
+    display: flex;
+    align-items: center;
+    // justify-content: space-between;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-icon {
+    font-size: 32px;
+    padding: 10px;
+    color: #4caf50;
+  }
+  
+  .dashboard-count {
+    margin-left: auto;
+    margin-right: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    background: #e8f5e9;
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+  
+  .user-card, .order-card, .employee-card {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    background: #f9f9f9;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .user-header, .order-header, .employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .search-bar {
+    width: 100%;
+    margin-bottom: 16px;
+  }
