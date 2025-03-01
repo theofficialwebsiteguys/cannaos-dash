@@ -1,0 +1,48 @@
+.users-container {
+    margin: 20px;
+}
+
+/* Scrollable Table */
+.table-container {
+    max-height: 700px; /* Adjust height as needed */
+    overflow-y: auto; /* Enables vertical scrolling */
+    overflow-x: auto; /* Enables horizontal scrolling */
+    display: block;
+    background: white; /* Keeps the background from disappearing */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Keeps shadow effect */
+}
+
+th {
+    position: sticky;
+    top: 0;
+    background: rgb(168, 168, 168) !important;
+    z-index: 2;
+}
+
+
+/* Alternate row colors */
+tr:nth-child(odd) {
+    background-color: #f9f9f9; /* Light grey */
+}
+
+tr:nth-child(even) {
+    background-color: #ffffff; /* White */
+}
+
+
+/* Ensure table header stands out */
+th {
+    background-color: #d1d1d1; /* Slightly darker grey for the header */
+    color: #333;
+    font-weight: bold;
+}
+
+/* Borders for better column separation */
+th, td {
+    border-bottom: 1px solid #ddd; /* Light border */
+    padding: 12px;
+}
+
+tr{
+    cursor: pointer;
+}

@@ -1,0 +1,41 @@
+.user-details-container {
+    margin: 20px;
+    // display: flex;
+    flex-direction: column;
+    max-height: 100vh; /* Prevents parent from scrolling */
+    overflow: hidden;
+}
+
+/* User Info Section */
+.user-info {
+    border-radius: 0;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Two-column layout */
+.info-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.info-column {
+    flex: 1;
+}
+
+/* Table should be scrollable */
+.table-container {
+    max-height: 300px; /* Adjustable height */
+    overflow-y: auto; /* Enables vertical scrolling */
+    padding: 10px;
+}
+
+table {
+    width: 100%;
+}
+
+tr{
+    cursor: pointer;
+}
+

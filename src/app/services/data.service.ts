@@ -1,35 +1,100 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment'
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
+  private usersSubject = new BehaviorSubject<any[]>([]);
+  private employeeOrdersSubject = new BehaviorSubject<any[]>([]);
+  private ordersSubject = new BehaviorSubject<any[]>([]);
+
+  users$ = this.usersSubject.asObservable();
+  employeeOrders$ = this.employeeOrdersSubject.asObservable();
+  orders$ = this.ordersSubject.asObservable();
+  
   constructor(private http: HttpClient) {}
 
   private getHeaders(): { [key: string]: string } {
     const sessionData = localStorage.getItem('sessionData');
     const token = sessionData ? JSON.parse(sessionData).token : null;
+
     const headers: { [key: string]: string } = {
       'Content-Type': 'application/json',
+      'x-auth-api-key': environment.db_api_key
     };
 
-    headers['x-auth-api-key'] = environment.db_api_key;
-  
+    console.log("Generated Headers:", headers); // Debugging
     return headers;
   }
 
-  getUserData(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.apiUrl}/users/`, { headers: this.getHeaders() });
+  fetchUserData(): Observable<any[]> {
+    const url = `${environment.apiUrl}/users/`;
+    console.log("Fetching Users from:", url); // Debugging
+
+    return this.http.get<any[]>(url, { headers: this.getHeaders() }).pipe(
+      tap(data => {
+        console.log("Fetched Users:", data); // Debugging
+        if (data && Array.isArray(data)) {
+          this.usersSubject.next(data);
+        } else {
+          console.warn("Unexpected Users API Response:", data);
+          this.usersSubject.next([]); // Ensure no null issues
+        }
+      }),
+      catchError(err => {
+        console.error("Error Fetching Users:", err);
+        return throwError(() => err);
+      })
+    );
   }
 
-  getOrdersByEmployeesData(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.apiUrl}/orders/employees`, { headers: this.getHeaders() });
+  fetchOrdersByEmployeesData(): Observable<any[]> {
+    const url = `${environment.apiUrl}/orders/employees`;
+    console.log("Fetching Employee Orders from:", url); // Debugging
+
+    return this.http.get<any[]>(url, { headers: this.getHeaders() }).pipe(
+      tap(data => {
+        console.log("Fetched Employee Orders:", data);
+        if (data && Array.isArray(data)) {
+          this.employeeOrdersSubject.next(data);
+        } else {
+          console.warn("Unexpected Employee Orders API Response:", data);
+          this.employeeOrdersSubject.next([]);
+        }
+      }),
+      catchError(err => {
+        console.error("Error Fetching Employee Orders:", err);
+        return throwError(() => err);
+      })
+    );
   }
 
-  getOrdersData(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.apiUrl}/orders/`, { headers: this.getHeaders() });
+  fetchOrdersData(): Observable<any[]> {
+    const url = `${environment.apiUrl}/orders/`;
+    console.log("Fetching Orders from:", url); // Debugging
+
+    return this.http.get<any[]>(url, { headers: this.getHeaders() }).pipe(
+      tap(data => {
+        console.log("Fetched Orders:", data); // Debugging
+        if (data && Array.isArray(data)) {
+          // Convert total_amount to number
+          const formattedData = data.map(order => ({
+            ...order,
+            total_amount: parseFloat(order.total_amount) || 0
+          }));
+          this.ordersSubject.next(formattedData);
+        } else {
+          console.warn("Unexpected Orders API Response:", data);
+          this.ordersSubject.next([]);
+        }
+      }),
+      catchError(err => {
+        console.error("Error Fetching Orders:", err);
+        return throwError(() => err);
+      })
+    );
   }
 }
