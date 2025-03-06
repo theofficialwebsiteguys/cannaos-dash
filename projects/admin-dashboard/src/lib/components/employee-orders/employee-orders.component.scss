@@ -1,0 +1,62 @@
+.budtender-sales-container{
+    margin: 20px;
+}
+
+.table-container {
+    max-height: 700px; /* Adjust height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    display: block;
+    position: relative;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Soft outer shadow */
+    background: white; /* Ensure background consistency */
+}
+
+th {
+    position: sticky;
+    top: 0;
+    background: rgb(168, 168, 168) !important;
+    z-index: 2;
+}
+
+
+/* Alternate row colors */
+tr:nth-child(odd) {
+    background-color: #f9f9f9; /* Light grey */
+}
+
+tr:nth-child(even) {
+    background-color: #ffffff; /* White */
+}
+
+
+/* Ensure table header stands out */
+th {
+    background-color: #d1d1d1; /* Slightly darker grey for the header */
+    color: #333;
+    font-weight: bold;
+}
+
+/* Borders for better column separation */
+th, td {
+    border-bottom: 1px solid #ddd; /* Light border */
+    padding: 12px;
+}
+
+
+.clickable {
+    cursor: pointer;
+}
+
+.expanded-row {
+    background-color: #f1f1f1;
+    transition: all 0.3s ease-in-out;
+}
+
+.expanded {
+    background-color: #e8f5e9; /* Light green for expanded rows */
+}
+
+button mat-icon {
+    vertical-align: middle;
+}

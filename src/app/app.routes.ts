@@ -1,8 +1,10 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { OrdersComponent } from './components/orders/orders.component';
-import { UsersComponent } from './components/users/users.component';
-import { BudtenderSalesComponent } from './components/budtender-sales/budtender-sales.component';
+import { DashboardComponent } from '../../projects/admin-dashboard/src/lib/components/dashboard/dashboard.component';
+import { OrdersComponent } from '../../projects/admin-dashboard/src/lib/components/orders/orders.component';
+import { UsersComponent } from '../../projects/admin-dashboard/src/lib/components/users/users.component';
+import { BudtenderSalesComponent } from '../../projects/admin-dashboard/src/lib/components/budtender-sales/budtender-sales.component';
+import { ToolsComponent } from '../../projects/admin-dashboard/src/lib/components/tools/tools.component';
+
 
 export const routes: Routes = [
     {
@@ -12,7 +14,7 @@ export const routes: Routes = [
         { path: 'orders', component: OrdersComponent },
         { path: 'users', component: UsersComponent },
         { path: 'budtender-sales', component: BudtenderSalesComponent },
-        // add more child routes here as needed
+        { path: 'tools', component: ToolsComponent },
         { path: '', redirectTo: 'orders', pathMatch: 'full' }
       ]
     },

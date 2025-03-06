@@ -1,0 +1,87 @@
+<div class="users-container">
+    <h2>Users ({{ filteredUsers.data.length }})</h2>
+
+    <lib-order-details *ngIf="selectedUser && selectedOrder" [order]="selectedOrder" (back)="closeDetail()"></lib-order-details>
+    <lib-user-detail *ngIf="selectedUser && !selectedOrder" [user]="selectedUser" (closeDetail)="closeDetail()" (orderSelected)="selectOrder($event)"></lib-user-detail>
+    <div *ngIf="!selectedUser">
+<!-- Search Bar -->
+<mat-form-field class="search-bar">
+    <mat-label>Search Users</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Search by Name or Email">
+</mat-form-field>
+
+<!-- Scrollable Table Wrapper -->
+<div class="table-container">
+    <table mat-table matSort [dataSource]="filteredUsers" matSort class="mat-elevation-z8">
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <td mat-cell *matCellDef="let user">{{ user.id }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+            <td mat-cell *matCellDef="let user">{{ user.fname }} {{ user.lname }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+            <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="dob">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>dob</th>
+            <td mat-cell *matCellDef="let user">{{ user.dob }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="country">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>country</th>
+            <td mat-cell *matCellDef="let user">{{ user.country }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>phone</th>
+            <td mat-cell *matCellDef="let user">{{ user.phone }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="alleaves_customer_id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>alleaves_customer_id</th>
+            <td mat-cell *matCellDef="let user">{{ user.alleaves_customer_id }}</td>
+        </ng-container>
+        
+        <ng-container matColumnDef="points">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>points</th>
+            <td mat-cell *matCellDef="let user">{{ user.points }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="mostOrderedProduct">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Most Ordered Product</th>
+            <td mat-cell *matCellDef="let user">{{ user.mostOrderedProduct }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="mostOrderedCategory">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Most Ordered Category</th>
+            <td mat-cell *matCellDef="let user">{{ user.mostOrderedCategory }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="averageSpend">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Average Spend</th>
+            <td mat-cell *matCellDef="let user">${{ user.averageSpend }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="totalSpent">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Spent</th>
+            <td mat-cell *matCellDef="let user">${{ user.totalSpent }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>createdAt</th>
+            <td mat-cell *matCellDef="let user">{{ user.createdAt }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: userColumns;"  (click)="selectUser(row)"></tr>
+    </table>
+</div>
+    </div>
+    
+</div>

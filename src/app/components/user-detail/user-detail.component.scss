@@ -3,7 +3,6 @@
     // display: flex;
     flex-direction: column;
     max-height: 100vh; /* Prevents parent from scrolling */
-    overflow: hidden;
 }
 
 /* User Info Section */
@@ -28,7 +27,11 @@
 .table-container {
     max-height: 300px; /* Adjustable height */
     overflow-y: auto; /* Enables vertical scrolling */
-    padding: 10px;
+    overflow-x: auto; /* Enables horizontal scrolling if needed */
+    display: block;
+    background: white; /* Ensures the background remains visible */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Keeps shadow effect */
+    
 }
 
 table {
@@ -38,4 +41,5 @@ table {
 tr{
     cursor: pointer;
 }
+
 

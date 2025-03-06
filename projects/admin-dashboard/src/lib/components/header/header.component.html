@@ -1,0 +1,14 @@
+<header class="header">
+    <div class="date">
+        <i class="fa-solid fa-calendar"></i>
+        <p>{{ today }}</p>
+    </div>
+
+    <div class="metrics">
+        <p><i class="fa-solid fa-dollar-sign"></i> Total Sales: ${{ totalSalesToday.toFixed(2) }}</p>
+        <p><i class="fa-solid fa-box"></i> Top Product: {{ topProductToday || 'N/A' }}</p>
+        <p><i class="fa-solid fa-receipt"></i> Total Orders: {{ totalOrdersToday }}</p>
+    </div>
+
+    <a class="view-store" [routerLink]="'/'">View Store</a>
+</header>

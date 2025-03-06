@@ -1,0 +1,84 @@
+.orders-container {
+    margin: 20px;
+}
+
+/* Make the table scrollable while keeping the headers fixed */
+.table-container {
+    max-height: 600px; /* Adjust height as needed */
+    overflow-y: auto; /* Enables vertical scrolling */
+    overflow-x: auto; /* Enables horizontal scrolling if needed */
+    display: block;
+    background: white; /* Ensures the background remains visible */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Keeps shadow effect */
+}
+
+/* Keep table header visible while scrolling */
+th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 2;
+}
+
+
+th {
+    position: sticky;
+    top: 0;
+    background: rgb(168, 168, 168) !important;
+    z-index: 2;
+}
+
+
+/* Alternate row colors */
+tr:nth-child(odd) {
+    background-color: #f9f9f9; /* Light grey */
+}
+
+tr:nth-child(even) {
+    background-color: #ffffff; /* White */
+}
+
+
+/* Ensure table header stands out */
+th {
+    background-color: #d1d1d1; /* Slightly darker grey for the header */
+    color: #333;
+    font-weight: bold;
+}
+
+/* Borders for better column separation */
+th, td {
+    border-bottom: 1px solid #ddd; /* Light border */
+    padding: 12px;
+}
+
+tr{
+    cursor: pointer;
+}
+
+/* Sales Metrics - Clean & Subtle */
+.sales-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 14px;
+    color: #444;
+    border-bottom: 1px solid #ddd; /* Light divider for subtle separation */
+    margin-bottom: 15px;
+}
+
+.sales-metrics span {
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* Responsive Tweaks */
+@media (max-width: 900px) {
+    .sales-metrics {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}

@@ -1,0 +1,78 @@
+<div class="budtender-sales-container">
+    <h2>Budtender Sales</h2>
+
+    <!-- If no employee is selected, show the employee table -->
+    <div *ngIf="!selectedEmployee">
+        <!-- Search Bar -->
+        <mat-form-field class="search-bar">
+            <mat-label>Search Employees</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Search by Name">
+        </mat-form-field>
+
+        <!-- Scrollable Table Wrapper -->
+        <div class="table-container">
+            <table mat-table matSort [dataSource]="employeeSales" class="mat-elevation-z8">
+
+                <!-- Employee Name Column -->
+                <ng-container matColumnDef="employee">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Employee</th>
+                    <td mat-cell *matCellDef="let emp" class="clickable">
+                        {{ emp.employee }}
+                    </td>
+                </ng-container>
+
+                <!-- Total Sales Column -->
+                <ng-container matColumnDef="totalSales">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Sales</th>
+                    <td mat-cell *matCellDef="let emp">{{ emp.totalSales | currency }}</td>
+                </ng-container>
+
+                <!-- Monthly Average Sales Column -->
+                <ng-container matColumnDef="monthlyAverage">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Monthly Avg</th>
+                    <td mat-cell *matCellDef="let emp">{{ emp.monthlyAverage | currency }}</td>
+                </ng-container>
+
+                <!-- Weekly Average Sales Column -->
+                <ng-container matColumnDef="weeklyAverage">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Weekly Avg</th>
+                    <td mat-cell *matCellDef="let emp">{{ emp.weeklyAverage | currency }}</td>
+                </ng-container>
+
+                <!-- Daily Average Sales Column -->
+                <ng-container matColumnDef="dailyAverage">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Daily Avg</th>
+                    <td mat-cell *matCellDef="let emp">{{ emp.dailyAverage | currency }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="mostSoldProduct">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Most Sold Product</th>
+                    <td mat-cell *matCellDef="let emp">{{ emp.mostSoldProduct }}</td>
+                </ng-container>
+
+                <!-- Most Sold Category -->
+                <ng-container matColumnDef="mostSoldCategory">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Most Sold Category</th>
+                    <td mat-cell *matCellDef="let emp">{{ emp.mostSoldCategory }}</td>
+                </ng-container>
+
+
+                <ng-container matColumnDef="view">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let emp"><button mat-button (click)="viewEmployeeOrders(emp)">View More</button></td>
+                </ng-container>
+
+                <!-- Table Headers -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable"></tr>
+
+            </table>
+        </div>
+    </div>
+
+    <!-- If an employee is selected, show their orders -->
+    <lib-employee-orders *ngIf="selectedEmployee" 
+                         [employee]="selectedEmployee"
+                         (goBack)="goBackToSales()">
+    </lib-employee-orders>
+</div>

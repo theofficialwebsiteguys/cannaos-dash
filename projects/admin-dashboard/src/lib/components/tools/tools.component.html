@@ -1,0 +1,95 @@
+<div class="admin-container">
+    <div class="grid-container">
+      
+      <!-- LEFT COLUMN: DELIVERY + NOTIFICATION -->
+      <div class="left-column">
+        
+        <!-- Delivery Toggle (Compact & On Top) -->
+        <div class="section delivery-section">
+          <h2>Delivery</h2>
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="deliveryAvailable" (change)="onToggleDelivery()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+  
+        <!-- Notification Center -->
+        <div class="section notification-section">
+          <h2>Notification Center</h2>
+          <div class="input-group">
+            <label>Notification Title</label>
+            <input type="text" [(ngModel)]="title" placeholder="Title" />
+          </div>
+  
+          <div class="input-group">
+            <label>Notification Body</label>
+            <textarea [(ngModel)]="body" placeholder="Body"></textarea>
+          </div>
+  
+          <div class="input-group">
+            <label>Select Category (Optional)</label>
+            <select [(ngModel)]="selectedCategory">
+              <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+            </select>
+          </div>
+  
+          <div class="input-group">
+            <label>Upload Image</label>
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+          </div>
+  
+          <div *ngIf="imageUrl" class="image-preview">
+            <img [src]="imageUrl" alt="Preview" />
+          </div>
+  
+          <div class="button-group">
+            <button class="primary" (click)="sendNotification()">Send Notification</button>
+            <button class="secondary" (click)="clearNotificationForm()">Clear</button>
+          </div>
+        </div>
+  
+      </div>
+     
+      <div class="section banner-section">
+        <h2>Banner Controller</h2>
+      
+        <!-- Image Grid -->
+        <div class="image-grid">
+          <div *ngFor="let image of carouselImages; let i = index" class="image-card" (click)="toggleDropdown(i)">
+            <img [src]="image" class="carousel-thumbnail">
+            <p>Carousel {{ i + 1 }}</p>
+          </div>
+        </div>
+      
+        <!-- Expandable Image Preview & Upload -->
+        <div *ngFor="let image of carouselImages; let i = index">
+          <div *ngIf="expandedIndex === i" class="expandable-content">
+      
+            <div class="image-comparison">
+              <!-- Original Image -->
+              <div class="image-preview-container">
+                <p>Original Image</p>
+                <img [src]="carouselImages[i]" class="preview-image original">
+              </div>
+      
+              <!-- Uploaded Image Preview (Appears Immediately) -->
+              <div class="image-preview-container" *ngIf="uploadedImagePreviewUrl[i]">
+                <p>Uploaded Image</p>
+                <img [src]="uploadedImagePreviewUrl[i]" class="preview-image uploaded">
+              </div>
+            </div>
+      
+            <!-- File Upload -->
+            <input type="file" (change)="onImageFileSelected($event, i)" accept="image/*">
+            <p *ngIf="selectedFileName">{{ selectedFileName }}</p>
+      
+            <!-- Replace Button -->
+            <button class="primary replace" (click)="replaceImage(i)" [disabled]="!selectedImageFile[i]">Replace Image</button>
+          </div>
+        </div>
+      </div>
+      
+  
+    </div>
+  </div>
+  
