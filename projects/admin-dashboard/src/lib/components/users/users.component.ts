@@ -10,6 +10,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { UserDetailComponent } from '../user-detail/user-detail.component';
 import { OrderDetailsComponent } from '../order-details/order-details.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'lib-users',
@@ -63,6 +64,55 @@ export class UsersComponent implements AfterViewInit {
       console.error("MatSort is undefined ❌. Check @ViewChild(MatSort)");
     }
   }
+
+  exportToCSV() {
+    const data = this.filteredUsers.filteredData.map(user => ({
+      ID: user.id,
+      Name: `${user.fname} ${user.lname}`,
+      Email: user.email,
+      DOB: user.dob,
+      Age: this.calculateAge(user.dob),
+      Country: user.country,
+      Phone: user.phone,
+      Points: user.points,
+      "Most Ordered Product": user.mostOrderedProduct,
+      "Most Ordered Category": user.mostOrderedCategory,
+      "Average Spend": user.averageSpend,
+      "Total Spent": user.totalSpent,
+      "Created At": user.createdAt
+    }));
+
+    const csvContent = this.convertToCSV(data);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `UsersData_${new Date().toISOString().slice(0, 10)}.csv`);
+  }
+
+  /**
+   * Converts an array of objects into CSV format.
+   */
+  convertToCSV(objArray: any[]) {
+    const header = Object.keys(objArray[0]).join(',') + '\n';
+    const rows = objArray.map(obj => Object.values(obj).map(value => `"${value}"`).join(',')).join('\n');
+    return header + rows;
+  }
+
+  calculateAge(dob: string | Date): number {
+    if (!dob) return 0;
+    
+    const birthDate = new Date(dob);
+    const today = new Date();
+  
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+    // Adjust age if the birthday hasn't occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+  
+    return age;
+  }
+  
 
   updateUsersWithOrders(): void {
     if (!this.users.length || !this.orders.length) return;

@@ -22,6 +22,9 @@
     "@angular/router": "^19.1.0",
     "@capacitor/core": "^7.0.1",
     "@swimlane/ngx-charts": "^22.0.0-alpha.0",
+    "chart.js": "^4.4.8",
+    "file-saver": "^2.0.5",
+    "ng2-charts": "^8.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -30,6 +33,7 @@
     "@angular-devkit/build-angular": "^19.1.8",
     "@angular/cli": "^19.1.8",
     "@angular/compiler-cli": "^19.1.0",
+    "@types/file-saver": "^2.0.7",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",

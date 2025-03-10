@@ -10,6 +10,11 @@
     <input matInput (keyup)="applyFilter($event)" placeholder="Search by Name or Email">
 </mat-form-field>
 
+<button class="export-button" mat-raised-button color="primary" (click)="exportToCSV()">
+    Export to CSV
+  </button>
+  
+
 <!-- Scrollable Table Wrapper -->
 <div class="table-container">
     <table mat-table matSort [dataSource]="filteredUsers" matSort class="mat-elevation-z8">
@@ -29,9 +34,12 @@
         </ng-container>
 
         <ng-container matColumnDef="dob">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>dob</th>
-            <td mat-cell *matCellDef="let user">{{ user.dob }}</td>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>DOB (Age)</th>
+            <td mat-cell *matCellDef="let user">
+                {{ user.dob | date:'MM/dd/yyyy' }} ({{ calculateAge(user.dob) }} years)
+            </td>
         </ng-container>
+          
 
         <ng-container matColumnDef="country">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>country</th>

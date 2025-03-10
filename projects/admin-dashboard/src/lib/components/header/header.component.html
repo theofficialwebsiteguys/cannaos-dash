@@ -5,10 +5,11 @@
     </div>
 
     <div class="metrics">
-        <p><i class="fa-solid fa-dollar-sign"></i> Total Sales: ${{ totalSalesToday.toFixed(2) }}</p>
-        <p><i class="fa-solid fa-box"></i> Top Product: {{ topProductToday || 'N/A' }}</p>
-        <p><i class="fa-solid fa-receipt"></i> Total Orders: {{ totalOrdersToday }}</p>
+        <p><i class="fa-solid fa-dollar-sign"></i> <strong>Total Sales:</strong> ${{ totalSalesToday.toFixed(2) }}</p>
+        <p><i class="fa-solid fa-box"></i> <strong>Top Product:</strong> {{ topProductToday || 'N/A' }}</p>
+        <p><i class="fa-solid fa-receipt"></i> <strong>Total Orders:</strong> {{ totalOrdersToday }}</p>
     </div>
+    
 
     <a class="view-store" [routerLink]="'/'">View Store</a>
 </header>

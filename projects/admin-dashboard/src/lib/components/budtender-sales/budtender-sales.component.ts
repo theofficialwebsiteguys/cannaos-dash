@@ -10,6 +10,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 import { EmployeeOrdersComponent } from '../employee-orders/employee-orders.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'lib-budtender-sales',
@@ -19,8 +20,8 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
   styleUrl: './budtender-sales.component.scss'
 })
 export class BudtenderSalesComponent implements AfterViewInit{
-  @ViewChild(MatSort) sort!: MatSort;  // ✅ MatSort ViewChild reference
-  displayedColumns: string[] = ['employee', 'totalSales', 'monthlyAverage', 'weeklyAverage', 'dailyAverage', 'mostSoldProduct', 'mostSoldCategory', 'view'];
+  @ViewChild(MatSort) sort!: MatSort;
+  displayedColumns: string[] = ['employee', 'totalSales', 'totalSalesAmount', 'monthlyAverage', 'weeklyAverage', 'dailyAverage', 'mostSoldProduct', 'mostSoldCategory', 'view'];
   employeeSales = new MatTableDataSource<any>([]);
   selectedEmployee: any | null = null;
 
@@ -28,94 +29,68 @@ export class BudtenderSalesComponent implements AfterViewInit{
 
   ngOnInit(): void {
     this.dataService.employeeOrders$.subscribe(employeeOrders => {
-      this.groupOrdersByEmployee(employeeOrders);
+      this.processEmployeeData(employeeOrders);
     });
 
     this.dataService.fetchOrdersByEmployeesData().subscribe();
   }
 
   ngAfterViewInit() {
-    console.log("ngAfterViewInit triggered 🚀");
     if (this.sort) {
       this.employeeSales.sort = this.sort;
-      console.log("MatSort assigned ✅", this.sort);
-    } else {
-      console.error("MatSort is undefined ❌. Check @ViewChild(MatSort)");
     }
   }
 
-  groupOrdersByEmployee(orders: any[]) {
-    const grouped = orders.reduce((acc, order) => {
-      const empId = order.Employee.id;
-      const orderDate = new Date(order.createdAt);
+  processEmployeeData(employees: any[]) {
+    const processedEmployees = employees.map(employee => {
+      const orders = employee.EmployeeOrders || []; // Ensure it handles employees with no sales
+      const totalSalesAmount = orders.reduce((sum: any, order: any) => sum + Number(order.total_amount), 0);
+      const totalSales = orders.length;
 
-      if (!acc[empId]) {
-        acc[empId] = {
-          employee: `${order.Employee.fname} ${order.Employee.lname}`,
-          totalSales: 0,
-          orders: [],
-          firstOrderDate: orderDate,
-          lastOrderDate: orderDate,
-          productCount: {}, // Track product frequency
-          categoryCount: {}, // Track category frequency
-        };
-      }
+      let firstOrderDate = orders.length ? new Date(orders[0].createdAt) : null;
+      let lastOrderDate = orders.length ? new Date(orders[orders.length - 1].createdAt) : null;
 
-      acc[empId].totalSales += Number(order.total_amount);
-      acc[empId].orders.push(order);
+      const productCount: { [key: string]: number } = {};
+      const categoryCount: { [key: string]: number } = {};
 
-      // Update first and last order dates
-      acc[empId].firstOrderDate = orderDate < acc[empId].firstOrderDate ? orderDate : acc[empId].firstOrderDate;
-      acc[empId].lastOrderDate = orderDate > acc[empId].lastOrderDate ? orderDate : acc[empId].lastOrderDate;
+      // Process each order for product and category tracking
+      orders.forEach((order: any) => {
+        const orderDate = new Date(order.createdAt);
+        if (!firstOrderDate || orderDate < firstOrderDate) firstOrderDate = orderDate;
+        if (!lastOrderDate || orderDate > lastOrderDate) lastOrderDate = orderDate;
 
-      // Process items in the order
-      if (order.items) {
-        order.items.forEach((item: any) => {
-          // Track most sold product
-          if (!acc[empId].productCount[item.title]) {
-            acc[empId].productCount[item.title] = 0;
-          }
-          acc[empId].productCount[item.title] += item.quantity;
-
-          // Track most sold category
-          if (!acc[empId].categoryCount[item.category]) {
-            acc[empId].categoryCount[item.category] = 0;
-          }
-          acc[empId].categoryCount[item.category] += item.quantity;
+        order.items?.forEach((item: any) => {
+          productCount[item.title] = (productCount[item.title] || 0) + item.quantity;
+          categoryCount[item.category] = (categoryCount[item.category] || 0) + item.quantity;
         });
+      });
+
+      // Compute time-based averages
+      let dailyAverage = 0, weeklyAverage = 0, monthlyAverage = 0;
+      if (firstOrderDate && lastOrderDate) {
+        const daysActive = Math.max(1, Math.ceil((lastOrderDate.getTime() - firstOrderDate.getTime()) / (1000 * 60 * 60 * 24)));
+        const weeksActive = Math.max(1, Math.ceil(daysActive / 7));
+        const monthsActive = Math.max(1, Math.ceil(daysActive / 30));
+
+        dailyAverage = totalSalesAmount / daysActive;
+        weeklyAverage = totalSalesAmount / weeksActive;
+        monthlyAverage = totalSalesAmount / monthsActive;
       }
 
-      return acc;
-    }, {});
-
-    // Compute averages and find most sold product/category
-    Object.values(grouped).forEach((emp: any) => {
-      const { firstOrderDate, lastOrderDate, totalSales, productCount, categoryCount } = emp as any;
-
-      // Ensure first and last dates are valid
-      if (!(firstOrderDate instanceof Date) || !(lastOrderDate instanceof Date)) {
-        console.error(`Invalid date detected for ${emp.employee}`);
-        return;
-      }
-
-      // Date calculations
-      const msDiff = lastOrderDate.getTime() - firstOrderDate.getTime();
-      const daysActive = msDiff > 0 ? Math.ceil(msDiff / (1000 * 60 * 60 * 24)) : 1;
-      const weeksActive = Math.ceil(daysActive / 7);
-      const monthsActive = Math.ceil(daysActive / 30);
-
-      emp.dailyAverage = daysActive > 0 ? totalSales / daysActive : 0;
-      emp.weeklyAverage = weeksActive > 0 ? totalSales / weeksActive : 0;
-      emp.monthlyAverage = monthsActive > 0 ? totalSales / monthsActive : 0;
-
-      // Get most sold product
-      emp.mostSoldProduct = this.getMostSold(productCount);
-
-      // Get most sold category
-      emp.mostSoldCategory = this.getMostSold(categoryCount);
+      return {
+        employee: `${employee.fname} ${employee.lname}`,
+        totalSales,
+        totalSalesAmount,
+        dailyAverage,
+        weeklyAverage,
+        monthlyAverage,
+        mostSoldProduct: this.getMostSold(productCount),
+        mostSoldCategory: this.getMostSold(categoryCount),
+        orders: orders, // Keep orders linked for later viewing
+      };
     });
 
-    this.employeeSales.data = Object.values(grouped);
+    this.employeeSales.data = processedEmployees;
   }
 
   getMostSold(countObj: { [key: string]: number }) {
@@ -137,4 +112,32 @@ export class BudtenderSalesComponent implements AfterViewInit{
     this.employeeSales.filter = filterValue;
   }
 
+  exportToCSV() {
+    const data = this.employeeSales.filteredData.map(employee => ({
+      Employee: employee.employee,
+      "Total Sales": employee.totalSales,
+      "Total Sales Amount": `$${employee.totalSalesAmount}`,
+      "Monthly Average": `$${employee.monthlyAverage}`,
+      "Weekly Average": `$${employee.weeklyAverage}`,
+      "Daily Average": `$${employee.dailyAverage}`,
+      "Most Sold Product": employee.mostSoldProduct,
+      "Most Sold Category": employee.mostSoldCategory
+    }));
+
+    const csvContent = this.convertToCSV(data);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `Budtender_Sales_${new Date().toISOString().slice(0, 10)}.csv`);
+  }
+
+  /**
+   * Converts an array of objects into CSV format.
+   */
+  convertToCSV(objArray: any[]) {
+    if (!objArray.length) return '';
+
+    const header = Object.keys(objArray[0]).join(',') + '\n';
+    const rows = objArray.map(obj => Object.values(obj).map(value => `"${value}"`).join(',')).join('\n');
+    
+    return header + rows;
+  }
 }

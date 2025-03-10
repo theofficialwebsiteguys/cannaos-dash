@@ -18,6 +18,7 @@ export * from './lib/components/sidebar/sidebar.component'
 export * from './lib/components/user-detail/user-detail.component'
 export * from './lib/components/users/users.component'
 export * from './lib/components/tools/tools.component'
+export * from './lib/components/overview/overview.component'
 
 export * from './lib/services/config.service'
 export * from './lib/services/data.service'

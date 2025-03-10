@@ -2,9 +2,11 @@
     margin: 20px;
 }
 
+
+
 /* Make the table scrollable while keeping the headers fixed */
 .table-container {
-    max-height: 600px; /* Adjust height as needed */
+    max-height: 550px; /* Adjust height as needed */
     overflow-y: auto; /* Enables vertical scrolling */
     overflow-x: auto; /* Enables horizontal scrolling if needed */
     display: block;

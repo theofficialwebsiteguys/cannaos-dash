@@ -10,6 +10,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { UserDetailComponent } from './components/user-detail/user-detail.component';
 import { UsersComponent } from './components/users/users.component';
 import { ToolsComponent } from './components/tools/tools.component';
+import { OverviewComponent } from '../public-api';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { ToolsComponent } from './components/tools/tools.component';
     SidebarComponent,
     UserDetailComponent,
     UsersComponent,
-    ToolsComponent
+    ToolsComponent,
+    OverviewComponent
   ],
   exports: [
     BudtenderSalesComponent,
@@ -37,7 +39,8 @@ import { ToolsComponent } from './components/tools/tools.component';
     SidebarComponent,
     UserDetailComponent,
     UsersComponent,
-    ToolsComponent
+    ToolsComponent,
+    OverviewComponent
   ]
 })
 export class AdminDashboardModule {}

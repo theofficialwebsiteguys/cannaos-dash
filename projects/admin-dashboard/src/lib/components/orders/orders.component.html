@@ -1,5 +1,8 @@
 <div class="orders-container" *ngIf="!selectedOrder; else orderDetails">
   <h2>Orders</h2>
+  <button class="export-button" mat-raised-button color="primary" (click)="exportToCSV()">
+    Export to CSV
+  </button>
 
   <!-- Sales Metrics -->
   <div class="sales-metrics">

@@ -1,0 +1,179 @@
+/* 🔹 Ensure dashboard is fully responsive */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+    max-height: 850px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+}
+
+/* 🔹 Responsive Metrics Section */
+.metrics-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.metric-card {
+    flex: 1;
+    min-width: 160px;
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+    background: #ffffff;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.metric-value {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px;
+}
+
+/* 🔹 Main Grid: Left (Sales Charts) - Right (Category + Customer Retention) */
+.main-grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 20px;
+    align-items: stretch;
+    height: calc(100vh - 200px);
+}
+
+/* 🔹 Left Column: Sales Charts */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: hidden;
+    min-width: 0; /* Prevents flex items from breaking responsiveness */
+}
+
+.chart-card {
+    height: 45%;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* 🔹 Right Column: Category Sales + Customer Retention */
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+}
+
+/* 🔹 Category & Customer Retention Cards */
+.category-card {
+    flex: 1;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+}
+
+/* 🔹 Make Charts Responsive */
+.chart-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto; /* Allow charts to adapt */
+}
+
+.chart-container canvas {
+    max-width: 100%;
+    max-height: 250px;
+}
+
+/* 🔹 Keep Lists and Pie Charts Readable */
+.top-list {
+    list-style: none;
+    padding: 10px;
+    font-size: 14px;
+    color: #333;
+    margin-top: 10px;
+    border-top: 1px solid #ddd;
+    text-align: left;
+    width: 100%;
+}
+
+.top-list li {
+    padding: 4px 0;
+    font-weight: 500;
+}
+
+/* 🔹 Responsive Breakpoints */
+@media (max-width: 1024px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .right-column {
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .category-card {
+        flex: 1;
+        min-width: 45%; /* Keeps two cards side by side */
+    }
+
+    .chart-container {
+        height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .metrics-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .metric-card {
+        width: 100%;
+    }
+
+    .right-column {
+        flex-direction: column;
+    }
+
+    .category-card {
+        width: 100%;
+    }
+
+    .chart-container {
+        height: 180px;
+    }
+}
+
+
+/* 🔹 Fix Category Cards on Mobile */
+@media (max-width: 480px) {
+    .category-card {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .chart-container canvas {
+        max-width: 90%;
+    }
+
+    .top-list {
+        font-size: 12px;
+    }
+}
