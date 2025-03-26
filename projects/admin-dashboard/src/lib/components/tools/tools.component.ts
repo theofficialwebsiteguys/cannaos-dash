@@ -22,6 +22,14 @@ export class ToolsComponent {
   selectedImageFile: (File | undefined)[] = [];
   uploadedImagePreviewUrl: (string | undefined)[] = [];
   selectedIndex: number | null = null;
+
+  eventTitle = '';
+  eventDescription = '';
+  eventLocation = '';
+  eventDateTime = '';
+  eventImage = '';
+  eventFile?: File;
+
   constructor(private adminService: AdminService) {}
 
   ngOnInit() {
@@ -64,6 +72,13 @@ export class ToolsComponent {
           console.error('Error uploading image:', error);
         }
       });
+    }
+  }
+
+  onEventFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.eventFile = file;
     }
   }
 
@@ -142,6 +157,49 @@ export class ToolsComponent {
                 }
             });
     }
+}
+
+clearEventForm() {
+  this.eventTitle = '';
+  this.eventDescription = '';
+  this.eventLocation = '';
+  this.eventDateTime = '';
+  this.eventImage = '';
+}
+
+
+createEvent() {
+  if (!this.eventTitle || !this.eventDescription || !this.eventDateTime) {
+    console.error('Missing required fields (title, description, dateTime)');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', this.eventTitle);
+  formData.append('description', this.eventDescription);
+  formData.append('location', this.eventLocation);
+  formData.append('dateTime', this.eventDateTime);
+
+  // If user selected a file, attach it
+  if (this.eventFile) {
+    formData.append('imageFile', this.eventFile); // "imageFile" must match the field name used in multer.single('imageFile')
+  }
+
+  // Now call the service method that posts FormData
+  this.adminService.createEvent(formData).subscribe({
+    next: (response) => {
+      console.log('Event created successfully:', response);
+      // reset fields
+      this.eventTitle = '';
+      this.eventDescription = '';
+      this.eventLocation = '';
+      this.eventDateTime = '';
+      this.eventFile = undefined;
+    },
+    error: (error) => {
+      console.error('Error creating event:', error);
+    }
+  });
 }
 
 }

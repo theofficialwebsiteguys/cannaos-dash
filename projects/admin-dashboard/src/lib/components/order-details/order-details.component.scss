@@ -1,5 +1,9 @@
 .order-details-container{
     margin: 20px;
+    box-sizing: border-box;
+    max-height: 700px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevents horizontal scrolling */
 }
 
 .order-info{

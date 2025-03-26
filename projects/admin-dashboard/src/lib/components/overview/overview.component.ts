@@ -87,7 +87,7 @@ export class OverviewComponent {
               const categoryName = this.categoryChartData?.labels?.[categoryIndex] ?? 'Unknown';
               const topProduct = this.topProducts?.[categoryIndex];
     
-              const tooltipLines = [`Category Sales: ${tooltipItem.raw}`];
+              const tooltipLines = [`Value: ${tooltipItem.raw}`];
     
               if (topProduct) {
                 tooltipLines.push(`Top Product: ${topProduct.name} (${topProduct.sales})`);
@@ -329,75 +329,116 @@ export class OverviewComponent {
   }
 
   
-  generateCustomerRetentionTrend(users: any[], orders: any[]) {
+generateCustomerRetentionTrend(users: any[], orders: any[]) {
     const retentionData: { 
-        [month: string]: { newCustomers: Set<string>; returningCustomers: Set<string> } 
+        [month: string]: { newCustomers: Set<string>; returningCustomers: Set<string>; dormantCustomers: Set<string> } 
     } = {};
 
-    // Track first purchase month for each user
     const userFirstPurchase: { [userId: string]: string } = {};
+    const lastPurchase: { [userId: string]: string } = {};
 
     orders.forEach(order => {
-        if (!order.createdAt) return; // Skip invalid timestamps
+        if (!order.createdAt) return;
         const date = new Date(order.createdAt);
-        if (isNaN(date.getTime())) return; // Skip invalid dates
+        if (isNaN(date.getTime())) return;
         
-        const month = date.toISOString().slice(0, 7); // Format: YYYY-MM
+        const month = date.toISOString().slice(0, 7);
         if (!userFirstPurchase[order.user_id]) {
-            userFirstPurchase[order.user_id] = month; // Store first purchase month
+            userFirstPurchase[order.user_id] = month;
         }
+        lastPurchase[order.user_id] = month;
+    });
+
+    const currentDate = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(currentDate.getMonth() - 6);
+    const sixMonthsAgoStr = sixMonthsAgo.toISOString().slice(0, 7);
+
+    users.forEach(user => {
+        const userId = user.id;
+        if (!lastPurchase[userId] || lastPurchase[userId] > sixMonthsAgoStr) return;
+        
+        const inactiveMonth = new Date(lastPurchase[userId]);
+        inactiveMonth.setMonth(inactiveMonth.getMonth() + 6);
+        const inactiveMonthStr = inactiveMonth.toISOString().slice(0, 7);
+
+        if (!retentionData[inactiveMonthStr]) {
+            retentionData[inactiveMonthStr] = { newCustomers: new Set(), returningCustomers: new Set(), dormantCustomers: new Set() };
+        }
+        retentionData[inactiveMonthStr].dormantCustomers.add(userId);
     });
 
     orders.forEach(order => {
         const userId = order.user_id;
         if (!order.createdAt) return;
         
-        const date = new Date(order.createdAt);
-        if (isNaN(date.getTime())) return;
-        
-        const orderMonth = date.toISOString().slice(0, 7);
+        const orderMonth = new Date(order.createdAt).toISOString().slice(0, 7);
         const firstPurchaseMonth = userFirstPurchase[userId];
 
         if (!retentionData[orderMonth]) {
-            retentionData[orderMonth] = { newCustomers: new Set(), returningCustomers: new Set() };
+            retentionData[orderMonth] = { newCustomers: new Set(), returningCustomers: new Set(), dormantCustomers: new Set() };
         }
 
         if (orderMonth === firstPurchaseMonth) {
-            retentionData[orderMonth].newCustomers.add(userId); // First-time buyers
+            retentionData[orderMonth].newCustomers.add(userId);
         } else {
-            retentionData[orderMonth].returningCustomers.add(userId); // Returning buyers
+            retentionData[orderMonth].returningCustomers.add(userId);
         }
     });
 
-    // Generate sorted labels for chart
     const labels = Object.keys(retentionData).sort(); 
-    const newCustomersData = labels.map(month => retentionData[month]?.newCustomers.size || 0);
-    const returningCustomersData = labels.map(month => retentionData[month]?.returningCustomers.size || 0);
 
-    // Set chart data
+    const totalUsersEachMonth = labels.map(month => {
+        return (retentionData[month]?.newCustomers.size || 0) + 
+               (retentionData[month]?.returningCustomers.size || 0) +
+               (retentionData[month]?.dormantCustomers.size || 0);
+    });
+
+    const newCustomersData = labels.map((month, index) => 
+        totalUsersEachMonth[index] ? ((retentionData[month]?.newCustomers.size || 0) / totalUsersEachMonth[index]) * 100 : 0
+    );
+
+    const returningCustomersData = labels.map((month, index) => 
+        totalUsersEachMonth[index] ? ((retentionData[month]?.returningCustomers.size || 0) / totalUsersEachMonth[index]) * 100 : 0
+    );
+
+    const dormantCustomersData = labels.map((month, index) =>
+        totalUsersEachMonth[index] ? ((retentionData[month]?.dormantCustomers.size || 0) / totalUsersEachMonth[index]) * 100 : 0
+    );
+
+    const latestIndex = labels.length - 1;
+    const latestNewCustomers = newCustomersData[latestIndex]?.toFixed(1) || "0";
+    const latestReturningCustomers = returningCustomersData[latestIndex]?.toFixed(1) || "0";
+    const latestDormantCustomers = dormantCustomersData[latestIndex]?.toFixed(1) || "0";
+
     this.customerRetentionTrendData = {
         labels: labels,
         datasets: [
             {
-                label: 'New Customers',
+                label: `New (${latestNewCustomers}%)`,
                 data: newCustomersData,
-                backgroundColor: '#ffcd56',
-                borderColor: '#ffcd56',
-                fill: false
+                backgroundColor: 'rgba(255, 205, 86, 0.5)',
+                borderColor: 'rgba(255, 205, 86, 1)',
+                fill: true
             },
             {
-                label: 'Returning Customers',
+                label: `Returning (${latestReturningCustomers}%)`,
                 data: returningCustomersData,
-                backgroundColor: '#4bc0c0',
-                borderColor: '#4bc0c0',
-                fill: false
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: true
+            },
+            {
+                label: `Not Active (${latestDormantCustomers}%)`,
+                data: dormantCustomersData,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                fill: true
             }
         ]
     };
 
-    console.log("Retention Data:", this.customerRetentionTrendData);
 }
-
   
   
 

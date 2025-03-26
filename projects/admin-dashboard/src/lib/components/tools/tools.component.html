@@ -49,47 +49,90 @@
         </div>
   
       </div>
+
+      <div class="right-column">
      
-      <div class="section banner-section">
-        <h2>Banner Controller</h2>
-      
-        <!-- Image Grid -->
-        <div class="image-grid">
-          <div *ngFor="let image of carouselImages; let i = index" class="image-card" (click)="toggleDropdown(i)">
-            <img [src]="image" class="carousel-thumbnail">
-            <p>Carousel {{ i + 1 }}</p>
-          </div>
-        </div>
-      
-        <!-- Expandable Image Preview & Upload -->
-        <div *ngFor="let image of carouselImages; let i = index">
-          <div *ngIf="expandedIndex === i" class="expandable-content">
-      
-            <div class="image-comparison">
-              <!-- Original Image -->
-              <div class="image-preview-container">
-                <p>Original Image</p>
-                <img [src]="carouselImages[i]" class="preview-image original">
-              </div>
-      
-              <!-- Uploaded Image Preview (Appears Immediately) -->
-              <div class="image-preview-container" *ngIf="uploadedImagePreviewUrl[i]">
-                <p>Uploaded Image</p>
-                <img [src]="uploadedImagePreviewUrl[i]" class="preview-image uploaded">
-              </div>
+        <div class="section banner-section">
+          <h2>Banner Controller</h2>
+        
+          <!-- Image Grid -->
+          <div class="image-grid">
+            <div *ngFor="let image of carouselImages; let i = index" class="image-card" (click)="toggleDropdown(i)">
+              <img [src]="image" class="carousel-thumbnail">
+              <p>Carousel {{ i + 1 }}</p>
             </div>
-      
-            <!-- File Upload -->
-            <input type="file" (change)="onImageFileSelected($event, i)" accept="image/*">
-            <p *ngIf="selectedFileName">{{ selectedFileName }}</p>
-      
-            <!-- Replace Button -->
-            <button class="primary replace" (click)="replaceImage(i)" [disabled]="!selectedImageFile[i]">Replace Image</button>
           </div>
+        
+          <!-- Expandable Image Preview & Upload -->
+          <div *ngFor="let image of carouselImages; let i = index">
+            <div *ngIf="expandedIndex === i" class="expandable-content">
+        
+              <div class="image-comparison">
+                <!-- Original Image -->
+                <div class="image-preview-container">
+                  <p>Original Image</p>
+                  <img [src]="carouselImages[i]" class="preview-image original">
+                </div>
+        
+                <!-- Uploaded Image Preview (Appears Immediately) -->
+                <div class="image-preview-container" *ngIf="uploadedImagePreviewUrl[i]">
+                  <p>Uploaded Image</p>
+                  <img [src]="uploadedImagePreviewUrl[i]" class="preview-image uploaded">
+                </div>
+              </div>
+        
+              <!-- File Upload -->
+              <input type="file" (change)="onImageFileSelected($event, i)" accept="image/*">
+              <p *ngIf="selectedFileName">{{ selectedFileName }}</p>
+        
+              <!-- Replace Button -->
+              <button class="primary replace" (click)="replaceImage(i)" [disabled]="!selectedImageFile[i]">Replace Image</button>
+            </div>
+          </div>
+
         </div>
-      </div>
+
+          <div class="section event-section">
+            <h2>Create Event</h2>
+            
+            <div class="input-group">
+              <label>Event Title</label>
+              <input type="text" [(ngModel)]="eventTitle" placeholder="Enter event title" />
+            </div>
+            
+            <div class="input-group">
+              <label>Description</label>
+              <textarea [(ngModel)]="eventDescription" placeholder="Event details"></textarea>
+            </div>
+          
+            <div class="input-group">
+              <label>Location</label>
+              <input type="text" [(ngModel)]="eventLocation" placeholder="Event location" />
+            </div>
+            
+            <!-- This uses a datetime-local input so user can pick date & time -->
+            <div class="input-group">
+              <label>Date & Time</label>
+              <input type="datetime-local" [(ngModel)]="eventDateTime" />
+            </div>
+            
+            <div class="input-group">
+              <label>Event Image File</label>
+              <input type="file" (change)="onEventFileSelected($event)" accept="image/*" />
+            </div>
+          
+            <div class="button-group">
+              <button class="primary" (click)="createEvent()">Create Event</button>
+              <button class="secondary" (click)="clearEventForm()">Clear Fields</button>
+            </div>
+          </div>
+          
+          
+        </div>
+
+
       
-  
     </div>
   </div>
+  
   

@@ -1,5 +1,6 @@
+    <button mat-button (click)="goBack.emit()">← Back to Budtender Sales</button>
 <div *ngIf="!selectedOrder; else orderDetails" class="employee-orders-container">
-    <button mat-button (click)="goBack.emit()">← Back to Sales</button>
+
     <h2>{{ employee.employee }}'s Orders</h2>
 
     <table mat-table [dataSource]="ordersData" class="mat-elevation-z8">

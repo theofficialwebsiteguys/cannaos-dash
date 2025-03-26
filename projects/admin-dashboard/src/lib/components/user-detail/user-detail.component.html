@@ -11,7 +11,18 @@
           <p><strong>Email:</strong> {{ user.email }}</p>
           <p><strong>Phone:</strong> {{ user.phone }}</p>
           <p><strong>Country:</strong> {{ user.country }}</p>
-          <p><strong>Points:</strong> {{ user.points }}</p>
+          <p><strong>Points:</strong> 
+            <span *ngIf="!editMode"> {{ user.points }}</span>
+            <input *ngIf="editMode" type="number" [(ngModel)]="editablePoints">
+          </p>
+          <p><strong>Role:</strong> 
+            <span *ngIf="!editMode"> {{ user.role | titlecase }}</span>
+            <select *ngIf="editMode" [(ngModel)]="editableRole">
+              <option value="admin">Admin</option>
+              <option value="employee">Employee</option>
+              <option value="customer">Customer</option>
+            </select>
+          </p>          
         </div>
         <div class="info-column">
           <p><strong>Most Ordered Product:</strong> {{ user.mostOrderedProduct }}</p>
@@ -21,7 +32,14 @@
           <p><strong>Account Created:</strong> {{ user.createdAt | date:'medium' }}</p>
         </div>
       </div>
+
+      <button mat-button (click)="toggleEditMode()" *ngIf="!editMode">Edit</button>
+      <button mat-button color="primary" (click)="saveChanges()" *ngIf="editMode">Save</button>
+      <button mat-button color="warn" (click)="cancelEdit()" *ngIf="editMode">Cancel</button>
+  
     </mat-card>
+
+
 
     <!-- Scrollable Order Table -->
     <h3>Recent Orders</h3>

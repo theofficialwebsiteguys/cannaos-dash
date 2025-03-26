@@ -29,8 +29,7 @@ export class UsersComponent implements AfterViewInit {
   selectedOrder: any = null;
 
   userColumns = [
-    'id', 'name', 'email', 'dob', 'country', 'phone', 'points', 
-    'alleaves_customer_id', 'createdAt', 'mostOrderedProduct', 
+    'id', 'name', 'email', 'dob', 'phone', 'points', 'createdAt', 'mostOrderedProduct', 
     'mostOrderedCategory', 'averageSpend', 'totalSpent'
   ];
 

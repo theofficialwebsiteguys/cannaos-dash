@@ -2,7 +2,7 @@
     max-width: 1200px;
     margin: auto;
     padding: 20px;
-    max-height: 100vh; /* Adjust height as needed */
+    max-height: 800px; /* Adjust height as needed */
     overflow-y: auto; /* Enables vertical scrolling */
     overflow-x: auto; /* Enables horizontal scrolling if needed */
   }
@@ -10,10 +10,13 @@
   /* GRID LAYOUT */
   .grid-container {
     display: grid;
-    grid-template-columns: 1fr 2fr; /* Left column smaller, Right column larger */
-    gap: 20px;
-    align-items: start;
+    grid-template-columns: 1fr 2fr; /* left column 1 fraction, right column 2 fractions */
+    gap: 1rem; /* space between columns */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
   }
+  
   
   /* LEFT COLUMN (Delivery + Notification) */
   .left-column {
@@ -144,7 +147,7 @@
   button.secondary:hover {
     background: #bbb;
   }
-  .banner-section {
+  .banner-section, .event-section {
     background: #f9f9f9;
     padding: 20px;
     border-radius: 8px;
@@ -259,5 +262,38 @@
     .grid-container {
       grid-template-columns: 1fr; /* Stack on smaller screens */
     }
+  }
+  
+
+  .event-section {
+    margin-top: 2rem;
+  }
+  
+  .event-section h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .input-group {
+    margin-bottom: 1rem;
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: bold;
+  }
+  
+  .input-group input,
+  .input-group select,
+  .input-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
   }
   

@@ -52,11 +52,16 @@
 
     <mat-card class="category-card">
         <mat-card-title>Customer Retention Trend</mat-card-title>
-        <mat-card-subtitle>Monthly New vs Returning Customers</mat-card-subtitle>
+        <mat-card-subtitle>Monthly Distribution of New, Returning, and Dormant Customers</mat-card-subtitle>
         <div class="chart-container">
-          <canvas baseChart [data]="customerRetentionTrendData" [options]="chartOptions" [type]="'line'"></canvas>
+          <canvas baseChart
+            [data]="customerRetentionTrendData"
+            [options]="chartOptions"
+            [type]="'line'">
+          </canvas>
         </div>
       </mat-card>
+      
       
 </div>
 

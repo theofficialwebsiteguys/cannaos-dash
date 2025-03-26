@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 import { from, map, Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -150,15 +150,33 @@ toggleDelivery(): Observable<{ deliveryAvailable: boolean }> {
   return from(CapacitorHttp.request(options).then(response => response.data));
 }
 
-checkDeliveryEligibility(): Observable<{ deliveryAvailable: boolean }> {
-  const options = {
-    url: `${environment.apiUrl}/businesses/delivery-eligibility`,
-    method: 'GET',
-    headers: this.getHeaders()
-  };
+  checkDeliveryEligibility(): Observable<{ deliveryAvailable: boolean }> {
+    const options = {
+      url: `${environment.apiUrl}/businesses/delivery-eligibility`,
+      method: 'GET',
+      headers: this.getHeaders()
+    };
 
-  // Convert CapacitorHttp request to Observable
-  return from(CapacitorHttp.request(options).then(response => response.data));
-}
+    // Convert CapacitorHttp request to Observable
+    return from(CapacitorHttp.request(options).then(response => response.data));
+  }
+
+  updateUser(user: any): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/users/update`, user, { headers: this.getHeaders() });
+  }
+
+  // admin.service.ts
+  createEvent(eventData: any): Observable<any> {
+    const options = {
+      method: 'POST',
+      url: `${environment.apiUrl}/businesses/events`,
+      headers: this.getHeaders(),
+      data: eventData
+    };
+
+    return from(CapacitorHttp.request(options)).pipe(
+      map((response: any) => response.data)
+    );
+  }
 
 }
