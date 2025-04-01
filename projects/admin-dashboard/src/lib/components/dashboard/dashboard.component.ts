@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -11,11 +11,12 @@ import { MatInputModule } from '@angular/material/input'; // ✅ Needed for inpu
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 
 @Component({
   selector: 'lib-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule, HeaderComponent, SidebarComponent, MatCardModule, MatButtonModule, MatTableModule, MatTabsModule, MatIconModule, MatFormFieldModule, MatInputModule ],
+  imports: [RouterModule, CommonModule, HeaderComponent, SidebarComponent, MatCardModule, MatButtonModule, MatTableModule, MatTabsModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSidenavModule ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -34,8 +35,19 @@ export class DashboardComponent {
 
   constructor(private dataService: DataService) {}
 
+  isMobile: boolean = false;
+
+
   ngOnInit(): void {
+    this.checkScreenSize();
   }
 
+  @HostListener('window:resize')
+  onResize() {
+    this.checkScreenSize();
+  }
 
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768;
+  }
 }

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 
@@ -13,5 +13,25 @@ import { RouterModule } from '@angular/router';
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
+  @ViewChild('sidenav') sidenav!: MatSidenav;
+  isMobile: boolean = false;
 
+  ngOnInit() {
+    this.checkScreenSize();
+  }
+
+  @HostListener('window:resize', [])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 768;
+  }
+
+  @Output() linkClicked = new EventEmitter<void>();
+
+  linkClick() {
+    this.linkClicked.emit();
+  }
 }
