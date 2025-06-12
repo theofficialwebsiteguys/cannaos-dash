@@ -7,10 +7,29 @@
       <h3>General Information</h3>
       <div class="info-grid">
         <div class="info-column">
-          <p><strong>Name:</strong> {{ user.fname }} {{ user.lname }}</p>
-          <p><strong>Email:</strong> {{ user.email }}</p>
-          <p><strong>Phone:</strong> {{ user.phone }}</p>
-          <p><strong>Country:</strong> {{ user.country }}</p>
+         <p><strong>Name:</strong>
+          <span *ngIf="!editMode">{{ user.fname }} {{ user.lname }}</span>
+          <span *ngIf="editMode">
+            <input type="text" [(ngModel)]="editableFname" placeholder="First Name" />
+            <input type="text" [(ngModel)]="editableLname" placeholder="Last Name" />
+          </span>
+            </p>
+
+            <p><strong>Email:</strong>
+              <span *ngIf="!editMode">{{ user.email }}</span>
+              <input *ngIf="editMode" type="email" [(ngModel)]="editableEmail" />
+            </p>
+
+            <p><strong>Phone:</strong>
+              <span *ngIf="!editMode">{{ user.phone }}</span>
+              <input *ngIf="editMode" type="text" [(ngModel)]="editablePhone" />
+            </p>
+
+            <p><strong>Country:</strong>
+              <span *ngIf="!editMode">{{ user.country }}</span>
+              <input *ngIf="editMode" type="text" [(ngModel)]="editableCountry" />
+            </p>
+
           <p><strong>Points:</strong> 
             <span *ngIf="!editMode"> {{ user.points }}</span>
             <input *ngIf="editMode" type="number" [(ngModel)]="editablePoints">
@@ -22,7 +41,22 @@
               <option value="employee">Employee</option>
               <option value="customer">Customer</option>
             </select>
-          </p>          
+          </p>  
+          <p><strong>Premium:</strong> {{ user.premium ? 'Yes' : 'No' }}</p>
+
+          <ng-container *ngIf="user.premium; else showUpgrade">
+            <button mat-raised-button color="warn" (click)="downgradeFromPremium()">
+              Downgrade from Premium
+            </button>
+          </ng-container>
+          
+          <ng-template #showUpgrade>
+            <button mat-raised-button color="accent" (click)="upgradeToPremium()">
+              Upgrade to Premium
+            </button>
+          </ng-template>
+          
+          
         </div>
         <div class="info-column">
           <p><strong>Most Ordered Product:</strong> {{ user.mostOrderedProduct }}</p>
@@ -33,8 +67,14 @@
         </div>
       </div>
 
+    
       <button mat-button (click)="toggleEditMode()" *ngIf="!editMode">Edit</button>
-      <button mat-button color="primary" (click)="saveChanges()" *ngIf="editMode">Save</button>
+      <button mat-button color="primary" (click)="saveChanges()" [disabled]="saving" *ngIf="editMode">
+        <mat-spinner *ngIf="saving" diameter="20" style="margin-right: 8px;"></mat-spinner>
+        <span *ngIf="!saving">Save</span>
+        <span *ngIf="saving">Saving...</span>
+      </button>
+
       <button mat-button color="warn" (click)="cancelEdit()" *ngIf="editMode">Cancel</button>
   
     </mat-card>
@@ -44,19 +84,19 @@
     <!-- Scrollable Order Table -->
     <h3>Recent Orders</h3>
     <div class="table-container">
-      <table mat-table [dataSource]="user.orders" class="mat-elevation-z8">
+      <table mat-table matSort [dataSource]="userOrdersData" class="mat-elevation-z8">
         <ng-container matColumnDef="pos_order_id">
-          <th mat-header-cell *matHeaderCellDef>Order ID</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Order ID</th>
           <td mat-cell *matCellDef="let order">{{ order.pos_order_id }}</td>
         </ng-container>
 
         <ng-container matColumnDef="total_amount">
-          <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Amount</th>
           <td mat-cell *matCellDef="let order">{{ order.total_amount | currency }}</td>
         </ng-container>
 
         <ng-container matColumnDef="createdAt">
-          <th mat-header-cell *matHeaderCellDef>Created At</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
           <td mat-cell *matCellDef="let order">{{ order.createdAt | date:'medium' }}</td>
         </ng-container>
 

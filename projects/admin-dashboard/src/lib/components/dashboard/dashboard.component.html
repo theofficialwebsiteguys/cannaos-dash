@@ -1,6 +1,6 @@
 <mat-sidenav-container class="sidenav-container">
     <mat-sidenav #sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="!isMobile" class="sidenav">
-      <lib-sidebar (linkClicked)="sidenav.close()"></lib-sidebar>
+      <lib-sidebar (linkClicked)="isMobile && sidenav.close()"></lib-sidebar>
     </mat-sidenav>
   
     <mat-sidenav-content>

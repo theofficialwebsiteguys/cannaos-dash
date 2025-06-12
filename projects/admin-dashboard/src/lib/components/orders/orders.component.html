@@ -23,6 +23,14 @@
     <input matInput (keyup)="applyFilter($event)" placeholder="Search any column">
   </mat-form-field>
 
+  <mat-form-field class="date-picker">
+    <mat-label>Filter by Date</mat-label>
+    <input matInput [matDatepicker]="picker" (dateChange)="filterByDate($event.value)">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+  
+
   <!-- Scrollable Table -->
   <div class="table-container">
     <table mat-table [dataSource]="filteredOrders" matSort class="mat-elevation-z8">

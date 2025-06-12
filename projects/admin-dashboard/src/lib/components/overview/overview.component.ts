@@ -4,19 +4,35 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { Chart, ChartConfiguration, ChartData, ChartOptions, registerables } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatOptionModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { combineLatest } from 'rxjs';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
+import { FormsModule } from '@angular/forms';
+
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'lib-overview',
   standalone: true,
-  imports: [CommonModule, MatCardModule, BaseChartDirective],
+  imports: [CommonModule, FormsModule, MatCardModule, BaseChartDirective, MatDialogModule, MatTableModule, MatSortModule, MatButtonModule, MatOptionModule, MatFormFieldModule, MatSelectModule, MatDatepickerModule, MatInputModule, MatNativeDateModule],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.css'
 })
 export class OverviewComponent {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
+  allOrders: any[] = [];
+  allUsers: any[] = [];
+  
   totalOrders: number = 0;
   totalRevenue: number = 0;
   avgOrderValue: number = 0;
@@ -44,28 +60,70 @@ export class OverviewComponent {
   topProducts: { name: string; sales: number }[] = [];
   top5Products: { name: string; sales: number }[] = [];
 
+  allProductSales: {
+    title: string;
+    category: string;
+    unitsSold: number;
+    revenue: number;
+    orderCount: number;
+    avgUnitsPerOrder: number;
+    percentOfTotalUnits: number;
+    percentOfTotalRevenue: number;
+  }[] = [];
+
+  showModal = false;
+
+  sortColumn: string = 'revenue';
+  sortDirection: 'asc' | 'desc' = 'desc';
+
+  @ViewChild(MatSort) sort!: MatSort;
+
+  displayedColumns: string[] = [
+    'title',
+    'category',
+    'unitsSold',
+    'revenue',
+    'avgUnitsPerOrder',
+    'percentOfTotalRevenue'
+  ];
+
+  productSalesDataSource = new MatTableDataSource<any>();
+
+  tabs: string[] = [
+    'Overall Sales',
+    'Product Metrics',
+    'Loyalty Users',
+    'Budtender Metrics'
+  ];
+  selectedTab = 0;
+  selectedDateRange: string = '30d';
+  selectedMetricsRange: string = 'ytd';
+
+  customStartDate: Date | null = null;
+customEndDate: Date | null = null;
+
 
   constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
-    this.dataService.orders$.subscribe(orders => {
-      if (orders.length) {
-        this.calculateMetrics(orders);
-        this.calculateSalesAverages(orders);
-        this.generateSalesChart(orders);
-        this.generateCategoryChart(orders);
-        this.generateTopProductsChart(orders);
-        this.generatePeakHoursChart(orders);
-      }
+    combineLatest([
+      this.dataService.orders$,
+      this.dataService.users$
+    ]).subscribe(([orders, users]) => {
+      this.allOrders = orders;
+      this.allUsers = users;
+  
+      // Now safe to generate retention and metrics
+      this.generateCustomerRetentionTrend(this.allUsers, this.allOrders);
+  
+      this.calculateMetrics(orders);
+      this.calculateSalesAverages(orders);
+      this.generateSalesChart(orders);
+      this.generateCategoryChart(orders);
+      this.generateTopProductsChart(orders);
+      this.generatePeakHoursChart(orders);
     });
   
-    this.dataService.users$.subscribe(users => {
-      this.dataService.orders$.subscribe(orders => {
-        if (users.length && orders.length) {
-          this.generateCustomerRetentionTrend(users, orders);
-        }
-      });
-    });
   
     this.dataService.employeeOrders$.subscribe(employeeOrders => {
       if (employeeOrders.length) {
@@ -73,9 +131,9 @@ export class OverviewComponent {
       }
     });
   
-    this.dataService.fetchOrdersData().subscribe();
-    this.dataService.fetchOrdersByEmployeesData().subscribe();
-    this.dataService.fetchUserData().subscribe();
+    // this.dataService.fetchOrdersData().subscribe();
+    // this.dataService.fetchOrdersByEmployeesData().subscribe();
+    // this.dataService.fetchUserData().subscribe();
 
     this.chartOptions = {
       responsive: true,
@@ -100,9 +158,66 @@ export class OverviewComponent {
       }
     };
     
-    
+    // Apply default range filter on init
+    this.onDateRangeChange(this.selectedDateRange);
+
   }
   
+  openProductBreakdownModal() {
+    const productMap: { [key: string]: {
+      title: string;
+      category: string;
+      unitsSold: number;
+      revenue: number;
+      orderCount: number;
+    }} = {};
+  
+    let totalUnitsSold = 0;
+    let totalRevenue = 0;
+  
+    this.dataService.orders$.subscribe(orders => {
+      orders.forEach(order => {
+        order.items.forEach((item: any) => {
+          const key = `${item.title}-${item.category}`;
+          if (!productMap[key]) {
+            productMap[key] = {
+              title: item.title,
+              category: item.category,
+              unitsSold: 0,
+              revenue: 0,
+              orderCount: 0
+            };
+          }
+          productMap[key].unitsSold += item.quantity;
+          productMap[key].revenue += item.quantity * item.price;
+          productMap[key].orderCount += 1;
+  
+          totalUnitsSold += item.quantity;
+          totalRevenue += item.quantity * item.price;
+        });
+      });
+
+
+  
+      // Prepare final metrics list
+      this.allProductSales = Object.values(productMap)
+        .map(product => ({
+          ...product,
+          avgUnitsPerOrder: product.unitsSold / product.orderCount,
+          percentOfTotalUnits: (product.unitsSold / totalUnitsSold) * 100,
+          percentOfTotalRevenue: (product.revenue / totalRevenue) * 100
+        }))
+        .sort((a, b) => b.revenue - a.revenue); // sort by top earning
+  
+        this.productSalesDataSource.data = this.allProductSales;
+        this.showModal = true;
+        console.log("here")
+        setTimeout(() => {
+          this.productSalesDataSource.sort = this.sort;
+        });
+        
+    });
+  }
 
   calculateMetrics(orders: any[]) {
     let productCount: { [key: string]: number } = {};
@@ -464,5 +579,84 @@ generateCustomerRetentionTrend(users: any[], orders: any[]) {
     };
   }
   
+  onDateRangeChange(range: string) {
+    const now = new Date();
+    let fromDate = new Date();
   
+    switch (range) {
+      case '7d':
+        fromDate.setDate(now.getDate() - 7);
+        break;
+      case '30d':
+        fromDate.setDate(now.getDate() - 30);
+        break;
+      default:
+        return;
+    }
+  
+    this.filterSalesData(fromDate, now);
+  }
+  
+  filterSalesData(from: Date, to: Date) {
+    this.dataService.orders$.subscribe(orders => {
+      const filtered = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate >= from && orderDate <= to;
+      });
+  
+      this.generateSalesChart(filtered);
+      this.generatePeakHoursChart(filtered);
+    });
+  }
+  
+  onMetricsRangeChange(range: string) {
+    const now = new Date();
+    let from = new Date();
+  
+    switch (range) {
+      case '30d':
+        from.setDate(now.getDate() - 30);
+        break;
+      case '7d':
+        from.setDate(now.getDate() - 7);
+        break;
+      case 'ytd':
+      default:
+        from = new Date(now.getFullYear(), 0, 1); // Jan 1st
+        break;
+    }
+  
+    this.filterMetricsData(from, now);
+  }
+  
+  filterMetricsData(from: Date, to: Date) {
+    const filtered = this.allOrders.filter(order => {
+      const date = new Date(order.createdAt);
+      return date >= from && date <= to;
+    });
+  
+    // Reset the metrics before recalculating
+    this.totalOrders = 0;
+    this.totalRevenue = 0;
+    this.avgOrderValue = 0;
+    this.avgDailySales = 0;
+    this.avgWeeklySales = 0;
+    this.avgMonthlySales = 0;
+  
+    this.calculateMetrics(filtered);
+    this.calculateSalesAverages(filtered);
+  }
+  
+  applyCustomRange() {
+    if (!this.customStartDate || !this.customEndDate) return;
+
+    const start = new Date(this.customStartDate);
+    const end = new Date(this.customEndDate);
+    end.setHours(23, 59, 59, 999); // Include full end day
+
+    this.filterMetricsData(start, end);
+    this.filterSalesData(start, end);
+  }
+
 }
+

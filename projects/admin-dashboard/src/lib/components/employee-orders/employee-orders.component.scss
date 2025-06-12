@@ -1,13 +1,13 @@
-.employee-orders-container{
-    margin: 20px;
-    box-sizing: border-box;
-    max-height: 700px;
-    overflow-y: auto;
-    overflow-x: hidden; /* Prevents horizontal scrolling */
-}
+// .{
+//     margin: 20px;
+//     box-sizing: border-box;
+//     max-height: 700px;
+//     overflow-y: auto;
+//     overflow-x: hidden; /* Prevents horizontal scrolling */
+// }
 
-.table-container {
-    max-height: 700px; /* Adjust height */
+.employee-orders-container{
+    max-height: 650px; /* Adjust height */
     overflow-y: auto; /* Enable vertical scrolling */
     overflow-x: auto; /* Enable horizontal scrolling */
     display: block;

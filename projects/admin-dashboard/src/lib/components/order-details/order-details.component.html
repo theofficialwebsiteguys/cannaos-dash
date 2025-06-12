@@ -5,43 +5,49 @@
   
     <mat-card class="order-info">
       <h3>General Information</h3>
-      <p><strong>POS Order ID:</strong> {{ order.pos_order_id }}</p>
-      <p><strong>User ID:</strong> {{ order.user_id }}</p>
-      <p><strong>Points Added:</strong> {{ order.points_add }}</p>
-      <p><strong>Points Redeemed:</strong> {{ order.points_redeem }}</p>
-      <p><strong>Total Amount:</strong> {{ order.total_amount | currency }}</p>
-      <p><strong>Created At:</strong> {{ order.createdAt | date:'medium' }}</p>
+      <div class="info-grid">
+        <p><strong>POS Order ID:</strong> {{ order.pos_order_id }}</p>
+        <p><strong>User ID:</strong> {{ order.user_id }}</p>
+        <p><strong>Points Added:</strong> {{ order.points_add }}</p>
+        <p><strong>Points Redeemed:</strong> {{ order.points_redeem }}</p>
+        <p><strong>Total Amount:</strong> {{ order.total_amount | currency }}</p>
+        <p><strong>Created At:</strong> {{ order.createdAt | date:'medium' }}</p>
+      </div>
     </mat-card>
+    
   
     <h3>Order Items</h3>
-    <table mat-table [dataSource]="order.items" class="mat-elevation-z8">
-      <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef>Title</th>
-        <td mat-cell *matCellDef="let item">{{ item.title }}</td>
-      </ng-container>
-  
-      <ng-container matColumnDef="brand">
-        <th mat-header-cell *matHeaderCellDef>Brand</th>
-        <td mat-cell *matCellDef="let item">{{ item.brand }}</td>
-      </ng-container>
-  
-      <ng-container matColumnDef="category">
-        <th mat-header-cell *matHeaderCellDef>Category</th>
-        <td mat-cell *matCellDef="let item">{{ item.category }}</td>
-      </ng-container>
-  
-      <ng-container matColumnDef="quantity">
-        <th mat-header-cell *matHeaderCellDef>Quantity</th>
-        <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
-      </ng-container>
-  
-      <ng-container matColumnDef="price">
-        <th mat-header-cell *matHeaderCellDef>Price</th>
-        <td mat-cell *matCellDef="let item">{{ item.price | currency }}</td>
-      </ng-container>
-  
-      <tr mat-header-row *matHeaderRowDef="['title', 'brand', 'category', 'quantity', 'price']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['title', 'brand', 'category', 'quantity', 'price'];"></tr>
-    </table>
+    <div class="table-container">
+      <table mat-table matSort [dataSource]="ordersData" class="mat-elevation-z8">
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+          <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+        </ng-container>
+    
+        <ng-container matColumnDef="brand">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Brand</th>
+          <td mat-cell *matCellDef="let item">{{ item.brand }}</td>
+        </ng-container>
+    
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+          <td mat-cell *matCellDef="let item">{{ item.category }}</td>
+        </ng-container>
+    
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Quantity</th>
+          <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+        </ng-container>
+    
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
+          <td mat-cell *matCellDef="let item">{{ item.price | currency }}</td>
+        </ng-container>
+    
+        <tr mat-header-row *matHeaderRowDef="['title', 'brand', 'category', 'quantity', 'price']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['title', 'brand', 'category', 'quantity', 'price'];"></tr>
+      </table>
+    </div>
+    
   </div>
   

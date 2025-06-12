@@ -1,5 +1,5 @@
 .user-details-container {
-    margin: 20px;
+    padding: 20px;
     // display: flex;
     flex-direction: column;
     max-height: 100vh; /* Prevents parent from scrolling */
@@ -26,16 +26,54 @@
 
 /* Table should be scrollable */
 .table-container {
-    max-height: 300px; /* Adjustable height */
+    max-height: 550px; /* Adjust height as needed */
     overflow-y: auto; /* Enables vertical scrolling */
-    padding: 10px;
+    overflow-x: auto; /* Enables horizontal scrolling if needed */
+    display: block;
+    background: white; /* Ensures the background remains visible */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Keeps shadow effect */
 }
 
-table {
-    width: 100%;
+/* Keep table header visible while scrolling */
+th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 2;
+}
+
+
+th {
+    position: sticky;
+    top: 0;
+    background: rgb(168, 168, 168) !important;
+    z-index: 2;
+}
+
+
+/* Alternate row colors */
+tr:nth-child(odd) {
+    background-color: #f9f9f9; /* Light grey */
+}
+
+tr:nth-child(even) {
+    background-color: #ffffff; /* White */
+}
+
+
+/* Ensure table header stands out */
+th {
+    background-color: #d1d1d1; /* Slightly darker grey for the header */
+    color: #333;
+    font-weight: bold;
+}
+
+/* Borders for better column separation */
+th, td {
+    border-bottom: 1px solid #ddd; /* Light border */
+    padding: 12px;
 }
 
 tr{
     cursor: pointer;
 }
-

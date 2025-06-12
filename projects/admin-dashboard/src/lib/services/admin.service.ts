@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 import { from, map, Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -100,6 +100,29 @@ export class AdminService {
       map((response: any) => response.data) // Extract the `data` property
     );
   }
+
+  deleteCarouselImage(index: number) {
+    const url = `${environment.apiUrl}/notifications/images/${index}`;
+    const headers = {
+      'x-auth-api-key': environment.db_api_key
+    };
+  
+    return this.http.delete<{ message: string }>(url, { headers });
+  }
+  
+
+  addCarouselImage(file: File) {
+    const url = `${environment.apiUrl}/notifications/images/add`;
+  
+    const formData = new FormData();
+    formData.append('imageFile', file);
+  
+    const headers = {
+      'x-auth-api-key': environment.db_api_key
+    };
+  
+    return this.http.post<{ imageUrl: string; message: string }>(url, formData, { headers });
+  }
   
 
   replaceCarouselImage(file: File, index: number): Observable<{ imageUrl: string }> {
@@ -177,6 +200,144 @@ toggleDelivery(): Observable<{ deliveryAvailable: boolean }> {
     return from(CapacitorHttp.request(options)).pipe(
       map((response: any) => response.data)
     );
+  }
+
+  deleteEvent(eventId: string): Observable<any> {
+    const options = {
+      method: 'DELETE',
+      url: `${environment.apiUrl}/businesses/events/${eventId}`,
+      headers: this.getHeaders()
+    };
+  
+    return from(CapacitorHttp.request(options)).pipe(map((res: any) => res.data));
+  }  
+
+  getEvents(): Observable<any[]> {
+    const options = {
+      method: 'GET',
+      url: `${environment.apiUrl}/businesses/events`,
+      headers: this.getHeaders()
+    };
+  
+    return from(CapacitorHttp.request(options)).pipe(
+      map((response: any) => response.data)
+    );
+  }
+
+  updateEvent(eventId: string, formData: FormData): Observable<any> {
+    const options = {
+      method: 'PUT',
+      url: `${environment.apiUrl}/businesses/events/${eventId}`,
+      headers: this.getHeaders(),
+      data: formData,
+    };
+  
+    return from(CapacitorHttp.request(options)).pipe(
+      map((res: any) => res.data)
+    );
+  }
+  
+
+  upgradeUserToPremium(phone: string, email: string): Observable<any> {
+    const payload = { phone, email };
+  
+    return this.http.put(
+      `${environment.apiUrl}/users/user-membership/upgrade`,
+      payload,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  downgradeUserFromPremium(phone: string, email: string): Observable<any> {
+    const payload = { phone, email };
+  
+    return this.http.put(
+      `${environment.apiUrl}/users/user-membership/downgrade`,
+      payload,
+      { headers: this.getHeaders() }
+    );
+  }
+  
+  updateDeliveryZone(payload: any) {
+    return this.http.post(`${environment.apiUrl}/businesses/zone`, payload, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getDeliveryZone() {
+    return this.http.get(`${environment.apiUrl}/businesses/zone`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  sendEmailBlast(formData: FormData): Observable<any> {
+    const headers = {
+      'x-auth-api-key': environment.db_api_key
+    };
+
+    return this.http.post(`${environment.apiUrl}/resend/sendEmails`, formData, { headers });
+  }
+
+  registerEmailDomain(domain: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/resend/registerDomain`, { domain }, {       headers: this.getHeaders() });
+  }
+
+  getEmailDomainStatus(domain: string): Observable<{ status: string }> {
+    return this.http.get<{ status: string }>(`${environment.apiUrl}/resend/domainStatus?domain=${domain}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getSavedEmailDomainStatus(): Observable<{ domain: string, status: string }> {
+    return this.http.get<{ domain: string, status: string }>(`${environment.apiUrl}/resend/domainStatusForBusiness`, {
+        headers: this.getHeaders()
+    });
+  }
+
+  createAudience(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/resend/createAudience`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getAudience(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/resend/getAudience`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  createEmailBroadcast(formData: FormData): Observable<any> {
+    const headers = {
+      'x-auth-api-key': environment.db_api_key
+    };
+
+    return this.http.post(`${environment.apiUrl}/resend/createBroadcast`, formData, {
+      headers
+    });
+  }
+
+  updateBroadcast(data: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/resend/updateBroadcast`, data, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getBroadcasts(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/resend/getBroadcasts`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deleteBroadcast(broadcast_id: string): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/resend/deleteBroadcast?id=${broadcast_id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  sendBroadcast(broadcastId: string, schedule: string | null): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/resend/sendBroadcast?id=${broadcastId}`, { scheduledAt: schedule }, {
+      headers: this.getHeaders()
+    });
   }
 
 }

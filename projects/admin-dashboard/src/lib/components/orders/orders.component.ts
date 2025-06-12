@@ -10,11 +10,13 @@ import { OrderDetailsComponent } from '../order-details/order-details.component'
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { DataService } from '../../services/data.service';
 import { saveAs } from 'file-saver';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 @Component({
   selector: 'lib-orders',
   standalone: true,
-  imports: [CommonModule, MatTableModule, FormsModule, MatButtonModule, MatInputModule, MatIconModule, MatTabsModule, OrderDetailsComponent, MatSortModule ],
+  imports: [CommonModule, MatTableModule, FormsModule, MatButtonModule, MatInputModule, MatIconModule, MatTabsModule, OrderDetailsComponent, MatSortModule, MatDatepickerModule, MatNativeDateModule, ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.scss'
 })
@@ -43,12 +45,22 @@ export class OrdersComponent implements AfterViewInit {
   ngOnInit(): void {
     this.dataService.orders$.subscribe(orders => {
       this.orders = orders;
-      this.filteredOrders.data = orders;
+  
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+  
+      const todayOrders = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        orderDate.setHours(0, 0, 0, 0);
+        return orderDate.getTime() === today.getTime();
+      });
+  
+      this.filteredOrders.data = todayOrders;
       this.filteredOrders.filterPredicate = this.createFilter();
-      this.calculateMetrics();
+      this.calculateMetrics(); // consider also updating it to recalculate based on filtered data
     });
-
-    this.dataService.fetchOrdersData().subscribe();
+  
+    // this.dataService.fetchOrdersData().subscribe();
   }
 
   ngAfterViewInit() {
@@ -83,6 +95,23 @@ export class OrdersComponent implements AfterViewInit {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, `Orders_${new Date().toISOString().slice(0, 10)}.csv`);
   }
+
+  filterByDate(date: Date) {
+    if (!date) return;
+  
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+  
+    const filtered = this.orders.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === selectedDate.getTime();
+    });
+  
+    this.filteredOrders.data = filtered;
+    this.calculateMetrics(); // optionally recalculate for the selected day
+  }
+  
 
   /**
    * Converts an array of objects into CSV format.

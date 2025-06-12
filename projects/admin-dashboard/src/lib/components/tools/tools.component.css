@@ -1,6 +1,6 @@
 .admin-container {
-    max-width: 1200px;
-    margin: auto;
+    max-width: auto;
+    margin: 20px;
     padding: 20px;
     max-height: 800px; /* Adjust height as needed */
     overflow-y: auto; /* Enables vertical scrolling */
@@ -15,6 +15,14 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
+  }
+
+  .delete{
+    margin-left: 10px;
+  }
+
+  .upload{
+    margin-top: 10px;
   }
   
   
@@ -90,6 +98,14 @@
     border-radius: 8px;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.08);
   }
+
+  .email-section {
+    margin-top: 10px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.08);
+  }
   
   /* FORM ELEMENTS */
   .input-group {
@@ -105,7 +121,6 @@
   }
   
   input, textarea, select {
-    width: 90%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -196,6 +211,12 @@
     display: flex;
     justify-content: space-between;
     gap: 20px;
+  }
+
+  .image-preview {
+    img{
+      width: 50%;
+    }
   }
   
   .image-preview-container {
@@ -297,3 +318,217 @@
     margin-top: 1rem;
   }
   
+  .delivery-zone-section {
+    margin-top: 2rem;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.08);
+  }
+
+  .map-container {
+    height: 400px;
+    width: 100%;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+
+  .zone-form {
+    margin-top: 1rem;
+  }
+  
+  .day-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  .day-label {
+    flex: 1;
+    font-weight: 500;
+  }
+  
+  .time-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 2;
+  }
+  
+  .time-inputs input[type="time"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 100px;
+  }
+  
+  .save-zone-btn {
+    margin-top: 1rem;
+    padding: 10px 16px;
+    font-weight: bold;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .save-zone-btn:hover {
+    background: #0056b3;
+  }
+  
+
+  .tab-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  
+    button {
+      padding: 10px 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      background-color: #eee;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      color: black;
+  
+      &.active {
+        background-color: #007bff;
+        color: white;
+      }
+  
+      &:hover {
+        background-color: #ddd;
+      }
+    }
+  }
+  
+  .success-message {
+    color: rgb(11, 97, 11);
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  .domain-status-box {
+  border: 1px solid #e0e0e0;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f9f9f9;
+  margin-top: 16px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.status.pending .pending-dot {
+  background-color: orange;
+}
+
+.status.verified .verified-dot {
+  background-color: green;
+}
+
+.broadcast-actions{
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 10px;
+}
+.broadcast-card {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+  .broadcast-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    h4 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .subject {
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .timestamp {
+      color: #888;
+      font-size: 0.85rem;
+    }
+  }
+
+  button.primary {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #0056b3;
+    }
+  }
+}
+
+button.danger {
+  background-color: #dc3545;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button.danger:hover {
+  background-color: #c82333;
+}
+
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3; /* Light gray */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AdminService } from '../../services/admin.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,16 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './tools.component.css'
 })
 export class ToolsComponent {
+  @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
+
+
+  map!: google.maps.Map;
+  drawingManager!: google.maps.drawing.DrawingManager;
+  drawnZone: google.maps.Circle | google.maps.Polygon | null = null;
+
+  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  zoneSchedule: Record<string, { enabled: boolean; start: string; end: string }> = {};
+  
   title: string = '';
   body: string = '';
   imageUrl: string = '';
@@ -30,13 +40,75 @@ export class ToolsComponent {
   eventImage = '';
   eventFile?: File;
 
+  events: any[] = [];
+  editingEventId: string | null = null;
+  editEventForm = {
+    title: '',
+    description: '',
+    location: '',
+    dateTime: '',
+    file: undefined as File | undefined
+  };
+
+  addBannerFile?: File;
+
+  tabs: string[] = ['Notifications/Email Blasts', 'Banners', 'Events', 'Delivery Zones'];
+  selectedTab = 0;
+
+  isSavingZone: boolean = false;
+  zoneSavedSuccessfully: boolean = false;
+
+  emailDomainVerified: boolean = false;
+  domainVerificationPending: boolean = false;
+
+  emailSubject: string = '';
+  emailBody: string = '';
+  flyerFile?: File;
+  flyerPreviewUrl: string = '';
+  isImageFile: boolean = true;
+  targetAudience: string = 'all';
+
+  emailDomain: string = '';
+  emailDomainSubmitted: boolean = false;
+  userBroadcasts: any[] = [];
+
+  audienceId: string = ''
+
+  activeScheduler: string | null = null;
+  scheduleDateTime: string = '';
+
+  isCreatingBroadcast = false;
+  broadcastCreatedSuccessfully = false;
+  broadcastCreationError: string | null = null;
+
+  isSendingBroadcast = false;
+  sendingBroadcastId: string | null = null;
+
+  deletingBroadcastId: string | null = null;
+  isLoadingBroadcasts: boolean = false;
+
+
   constructor(private adminService: AdminService) {}
 
   ngOnInit() {
     this.loadCarouselImages();
     this.getDeliveryEligibility();
+    this.getEvents();
+    this.initZoneSchedule();
+
+    if(!this.emailDomainVerified){
+      this.getDomainVerification();
+    }
+
   }
 
+  ngAfterViewChecked(): void {
+    if (this.selectedTab === 3 && this.mapContainer && !this.map) {
+      this.initMap();
+      this.loadDeliveryZone();
+    }
+  }
+  
   triggerFileInput() {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) {
@@ -201,5 +273,500 @@ createEvent() {
     }
   });
 }
+
+  deleteEvent(eventId: string) {
+    if (confirm('Are you sure you want to delete this event?')) {
+      this.adminService.deleteEvent(eventId).subscribe({
+        next: () => {
+          this.events = this.events.filter(e => e.id !== eventId);
+        },
+        error: (err) => console.error('Error deleting event', err)
+      });
+    }
+  }
+
+  getEvents() {
+    this.adminService.getEvents().subscribe({
+      next: (res) => {
+        this.events = res;
+      },
+      error: (err) => console.error('Error fetching events', err)
+    });
+  }
+
+  startEditEvent(event: any) {
+    this.editingEventId = event.id;
+    this.editEventForm = {
+      title: event.title,
+      description: event.description,
+      location: event.location,
+      dateTime: event.dateTime.split('.')[0], // trim milliseconds for input compatibility
+      file: undefined
+    };
+  }
+
+  onEditEventFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.editEventForm.file = file;
+    }
+  }
+  
+  saveEventChanges() {
+    if (!this.editingEventId) return;
+  
+    const formData = new FormData();
+    formData.append('title', this.editEventForm.title);
+    formData.append('description', this.editEventForm.description);
+    formData.append('location', this.editEventForm.location);
+    formData.append('dateTime', this.editEventForm.dateTime);
+    if (this.editEventForm.file) {
+      formData.append('imageFile', this.editEventForm.file);
+    }
+  
+    this.adminService.updateEvent(this.editingEventId, formData).subscribe({
+      next: (res) => {
+        console.log('Event updated:', res);
+        this.getEvents(); // reload list
+        this.editingEventId = null;
+      },
+      error: (err) => console.error('Error updating event:', err)
+    });
+  }
+  
+  cancelEventEdit() {
+    this.editingEventId = null;
+  }
+  
+
+  deleteImage(index: number) {
+    if (confirm(`Are you sure you want to delete Carousel ${index + 1}?`)) {
+      this.adminService.deleteCarouselImage(index).subscribe({
+        next: (res) => {
+          console.log(res.message);
+          this.carouselImages[index] = ''; // Or remove it if you want
+          this.expandedIndex = null;
+          this.loadCarouselImages(); // Refresh the image list
+        },
+        error: (err) => {
+          console.error('Error deleting image:', err);
+        }
+      });
+    }
+  }
+
+  onAddBannerFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.addBannerFile = file;
+    }
+  }
+  
+  uploadNewBanner() {
+    if (!this.addBannerFile) return;
+  
+    this.adminService.addCarouselImage(this.addBannerFile).subscribe({
+      next: (res) => {
+        console.log(res.message);
+        this.addBannerFile = undefined;
+        this.loadCarouselImages(); // Refresh
+      },
+      error: (err) => console.error('Error adding banner:', err)
+    });
+  }
+  
+  initZoneSchedule(): void {
+    this.days.forEach(day => {
+      this.zoneSchedule[day] = { enabled: false, start: '', end: '' };
+    });
+  }
+
+  initMap(): void {
+    const center = new google.maps.LatLng(40.7128, -74.0060);
+
+    this.map = new google.maps.Map(this.mapContainer.nativeElement, {
+      center,
+      zoom: 12,
+    });
+
+    this.drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      drawingControl: true,
+      drawingControlOptions: {
+        position: google.maps.ControlPosition.TOP_CENTER,
+        drawingModes: [
+          google.maps.drawing.OverlayType.POLYGON,
+          google.maps.drawing.OverlayType.CIRCLE
+        ]
+      },
+      polygonOptions: {
+        fillColor: '#2196f3',
+        strokeWeight: 2,
+        fillOpacity: 0.3,
+        editable: true
+      },
+      circleOptions: {
+        fillColor: '#4caf50',
+        strokeWeight: 2,
+        fillOpacity: 0.3,
+        editable: true
+      }
+    });
+
+    this.drawingManager.setMap(this.map);
+
+    google.maps.event.addListener(this.drawingManager, 'overlaycomplete', (event:any) => {
+      if (this.drawnZone) {
+        this.drawnZone.setMap(null);
+      }
+      this.drawnZone = event.overlay;
+    });
+  }
+
+  saveZone(): void {
+    this.isSavingZone = true;
+    this.zoneSavedSuccessfully = false;
+
+    let geometry;
+  
+    if (this.drawnZone instanceof google.maps.Circle) {
+      const center = this.drawnZone.getCenter();
+      const radius = this.drawnZone.getRadius();
+      geometry = {
+        type: 'circle',
+        center: { lat: center?.lat(), lng: center?.lng() },
+        radius
+      };
+    } else if (this.drawnZone instanceof google.maps.Polygon) {
+      const path = this.drawnZone.getPath().getArray().map(coord => ({
+        lat: coord.lat(),
+        lng: coord.lng()
+      }));
+      geometry = {
+        type: 'polygon',
+        path
+      };
+    }
+  
+    const activeSchedule = Object.entries(this.zoneSchedule)
+      .filter(([_, val]) => val.enabled)
+      .map(([day, val]) => ({ day, startTime: val.start, endTime: val.end }));
+  
+    const payload = {
+      geometry,
+      schedule: activeSchedule
+    };
+  
+    this.adminService.updateDeliveryZone(payload).subscribe({
+      next: (res) => {
+        console.log('Delivery zone saved:', res);
+        this.zoneSavedSuccessfully = true;
+        setTimeout(() => this.zoneSavedSuccessfully = false, 3000); // Clear success after 3s
+      },
+      error: (err) => {
+        console.error('Error saving zone:', err);
+      },
+      complete: () => {
+        this.isSavingZone = false;
+      }
+    });
+  }
+
+  loadDeliveryZone(): void {
+    this.adminService.getDeliveryZone().subscribe({
+      next: (data: any) => {
+        if (!data?.geometry) return;
+
+        const { geometry, schedule } = data;
+
+        if (geometry.type === 'circle') {
+          const circle = new google.maps.Circle({
+            center: geometry.center,
+            radius: geometry.radius,
+            map: this.map,
+            fillColor: '#4caf50',
+            strokeWeight: 2,
+            fillOpacity: 0.3,
+            editable: true
+          });
+          this.drawnZone = circle;
+          this.map.setCenter(geometry.center);
+        } else if (geometry.type === 'polygon') {
+          const polygon = new google.maps.Polygon({
+            paths: geometry.path,
+            map: this.map,
+            fillColor: '#2196f3',
+            strokeWeight: 2,
+            fillOpacity: 0.3,
+            editable: true
+          });
+          this.drawnZone = polygon;
+          this.map.setCenter(geometry.path[0]);
+        }
+
+        schedule.forEach((entry: any) => {
+          this.zoneSchedule[entry.day] = {
+            enabled: true,
+            start: entry.startTime,
+            end: entry.endTime
+          };
+        });
+      },
+      error: (err) => console.error('Error loading zone:', err)
+    });
+  }
+  
+  onFlyerSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.flyerFile = file;
+
+    const fileType = file.type;
+    this.isImageFile = fileType.startsWith('image/');
+
+    if (this.isImageFile) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.flyerPreviewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this.flyerPreviewUrl = file.name;
+    }
+  }
+
+  sendEmailBlast() {
+    if (!this.emailSubject || !this.emailBody) {
+      console.error('Subject and body are required.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('subject', this.emailSubject);
+    formData.append('body', this.emailBody);
+    formData.append('audience', this.targetAudience);
+
+    if (this.flyerFile) {
+      formData.append('flyer', this.flyerFile);
+    }
+
+    this.adminService.sendEmailBlast(formData).subscribe({
+      next: (res) => {
+        console.log('Email sent:', res);
+        this.clearEmailForm();
+      },
+      error: (err) => {
+        console.error('Failed to send email:', err);
+      }
+    });
+  }
+
+  clearEmailForm() {
+    this.emailSubject = '';
+    this.emailBody = '';
+    this.flyerFile = undefined;
+    this.flyerPreviewUrl = '';
+    this.isImageFile = true;
+    this.targetAudience = 'all';
+
+    const fileInput = document.getElementById('flyerInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  registerEmailDomain() {
+    if (!this.emailDomain) {
+      console.error('Domain is required.');
+      return;
+    }
+
+    this.emailDomainSubmitted = true;
+    this.domainVerificationPending = true;
+
+    this.adminService.registerEmailDomain(this.emailDomain).subscribe({
+      next: (res) => {
+        console.log('Domain registered, checking verification...');
+        this.getDomainVerification();
+      },
+      error: (err) => {
+        console.error('Error registering domain:', err);
+        this.emailDomainSubmitted = false;
+        this.domainVerificationPending = false;
+      }
+    });
+  }
+
+  getDomainVerification() {
+    this.adminService.getSavedEmailDomainStatus().subscribe({
+      next: (res) => {
+        const isVerified = res.status === 'verified';
+
+        this.emailDomainVerified = isVerified;
+        this.domainVerificationPending = !isVerified;
+        this.emailDomainSubmitted = true;
+
+        if (isVerified) {
+          setTimeout(() => {
+            this.getAudienceThenBroadcasts();
+          }, 1000); // 600ms delay to avoid rate limit
+        }
+      },
+      error: (err) => {
+        console.error('Error polling domain verification:', err);
+      }
+    });
+  }
+
+  getAudienceThenBroadcasts() {
+    this.adminService.getAudience().subscribe({
+      next: (audienceRes) => {
+        this.audienceId = audienceRes.data.id;
+        console.log(this.audienceId)
+          setTimeout(() => {
+            this.loadBroadcasts();
+          }, 1000); // 600ms delay to avoid rate limit
+      },
+      error: (err) => {
+        console.error('Failed to get audience:', err);
+      }
+    });
+  }
+
+  loadBroadcasts() {
+    this.isLoadingBroadcasts = true;
+    this.adminService.getBroadcasts().subscribe({
+      next: (res) => {
+        this.userBroadcasts = res.broadcasts.filter((b: any) => b.data.status !== 'sent');
+        console.log(this.userBroadcasts);
+      },
+      error: (err) => console.error('Error loading broadcasts', err),
+      complete: () => {
+        this.isLoadingBroadcasts = false;
+      }
+    });
+  }
+
+  toggleScheduler(id: string) {
+    this.activeScheduler = this.activeScheduler === id ? null : id;
+  }
+
+  scheduleBroadcast(broadcastId: string, sendNow: boolean = false) {
+    const scheduledTime = sendNow
+      ? null
+      : this.scheduleDateTime;
+
+    this.sendingBroadcastId = broadcastId;
+
+    // if (!scheduledTime) {
+    //   console.warn('No datetime selected');
+    //   return;
+    // }
+
+    console.log(broadcastId)
+    this.adminService.sendBroadcast(broadcastId, scheduledTime).subscribe({
+      next: () => {
+        console.log(sendNow ? 'Broadcast sent now' : 'Broadcast scheduled');
+        this.loadBroadcasts();
+        this.activeScheduler = null;
+      },
+      error: (err) => console.error('Error scheduling broadcast', err),
+      complete: () => {
+        this.sendingBroadcastId = null;
+      }
+    });
+  }
+
+  createBroadcast() {
+    if (!this.emailSubject || !this.emailBody) {
+      console.error('Subject and body are required.');
+      return;
+    }
+    
+    this.isCreatingBroadcast = true;
+    this.broadcastCreatedSuccessfully = false;
+    this.broadcastCreationError = null;
+
+    const formData = new FormData();
+    formData.append('subject', this.emailSubject);
+    formData.append('body', this.emailBody);
+    formData.append('audienceId', this.audienceId);
+
+    if (this.flyerFile) {
+      formData.append('flyer', this.flyerFile);
+    }
+
+    this.adminService.createEmailBroadcast(formData).subscribe({
+      next: (res) => {
+        console.log('Broadcast created:', res);
+        this.clearEmailForm();
+        this.broadcastCreatedSuccessfully = true
+        setTimeout(() => this.loadBroadcasts(), 1000); // Avoid rate limit
+      },
+      error: (err) => {
+        this.broadcastCreationError = 'Failed to create broadcast.';
+        console.error('Broadcast creation failed:', err);
+      },
+      complete: () => {
+        this.isCreatingBroadcast = false;
+      }
+    });
+  }
+
+
+
+  createAudience() {
+    this.adminService.createAudience().subscribe({
+      next: (res) => {
+        console.log('Audience created:', res);
+        this.audienceId = res.id;
+      },
+      error: (err) => {
+        console.error('Broadcast creation failed:', err);
+      }
+    });
+  }
+
+  getAudience() {
+    this.adminService.getAudience().subscribe({
+      next: (res) => {
+        console.log('Audience:', res);
+        this.audienceId = res.id;
+      },
+      error: (err) => {
+        console.error('Broadcast creation failed:', err);
+      }
+    });
+  }
+
+  formatDate(dateString: string): string {
+    if(dateString === null){
+      return 'Not Scheduled';
+    }
+    const date = new Date(dateString);
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  confirmDeleteBroadcast(broadcastId: string) {
+    if (confirm('Are you sure you want to delete this broadcast?')) {
+      this.deletingBroadcastId = broadcastId;
+      this.adminService.deleteBroadcast(broadcastId).subscribe({
+        next: () => {
+          console.log('Broadcast deleted');
+          this.userBroadcasts = this.userBroadcasts.filter(b => b.data.id !== broadcastId);
+        },
+        error: (err) => console.error('Error deleting broadcast', err),
+        complete: () => this.deletingBroadcastId = null
+      });
+    }
+  }
+
 
 }
