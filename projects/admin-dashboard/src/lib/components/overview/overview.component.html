@@ -146,7 +146,26 @@
       <!-- Show employeeSalesChartData -->
     </div>
 
-  
+
+    <!-- 🟡 Brand Metrics Tab -->
+    <div *ngIf="selectedTab === 4">
+      <mat-card class="category-card">
+        <mat-card-title>Brand Purchases Breakdown</mat-card-title>
+        <mat-card-subtitle>Click a brand to view customers</mat-card-subtitle>
+
+        <!-- Brand List -->
+        <div class="brand-list">
+          <mat-list>
+            <mat-list-item *ngFor="let brand of brandMetrics" (click)="openBrandCustomersModal(brand)">
+              <div class="brand-row">
+                <span class="brand-name">{{ brand.name }}</span>
+                <span class="brand-stats">{{ brand.customerCount }} customers – {{ brand.totalRevenue | currency }}</span>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </mat-card>
+    </div>
 
 </div>
 
@@ -207,3 +226,40 @@
 
   </div>
 </div>
+
+<div *ngIf="showBrandModal" class="brand-modal-overlay">
+  <div class="brand-modal-inner">
+     <div class="modal-header-with-export">
+        <h2>{{ selectedBrand?.name }} – Customers</h2>
+        <button mat-stroked-button color="primary" (click)="exportBrandCustomersToCsv()">
+            Export CSV
+        </button>
+    </div>
+
+    <div class="brand-modal-table-wrapper">
+      <table mat-table [dataSource]="brandCustomerDataSource" class="mat-elevation-z8">
+
+        <!-- Customer -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Customer</th>
+          <td mat-cell *matCellDef="let element">{{ element.name }}<br>{{ element.email }}</td>
+        </ng-container>
+
+        <!-- Amount Spent -->
+        <ng-container matColumnDef="totalSpent">
+          <th mat-header-cell *matHeaderCellDef>Total Spent</th>
+          <td mat-cell *matCellDef="let element">{{ element.totalSpent | currency }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="brandCustomerColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: brandCustomerColumns;"></tr>
+      </table>
+    </div>
+
+    <button mat-button color="warn" (click)="showBrandModal = false" class="brand-modal-close">
+      Close
+    </button>
+  </div>
+</div>
+
+

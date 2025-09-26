@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { FormsModule } from '@angular/forms';
+import { MatListModule } from '@angular/material/list';
 
 
 Chart.register(...registerables);
@@ -23,7 +24,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'lib-overview',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, BaseChartDirective, MatDialogModule, MatTableModule, MatSortModule, MatButtonModule, MatOptionModule, MatFormFieldModule, MatSelectModule, MatDatepickerModule, MatInputModule, MatNativeDateModule],
+  imports: [CommonModule, FormsModule, MatCardModule, BaseChartDirective, MatDialogModule, MatTableModule, MatSortModule, MatButtonModule, MatOptionModule, MatFormFieldModule, MatSelectModule, MatDatepickerModule, MatInputModule, MatNativeDateModule, MatListModule],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.css'
 })
@@ -93,7 +94,8 @@ export class OverviewComponent {
     'Overall Sales',
     'Product Metrics',
     'Loyalty Users',
-    'Budtender Metrics'
+    'Budtender Metrics',
+    'Brand Metrics' 
   ];
   selectedTab = 0;
   selectedDateRange: string = '30d';
@@ -101,6 +103,17 @@ export class OverviewComponent {
 
   customStartDate: Date | null = null;
 customEndDate: Date | null = null;
+
+brandMetrics: {
+  name: string;
+  totalRevenue: number;
+  customerCount: number;
+  customers: { id: string; name: string; totalSpent: number }[];
+}[] = [];
+showBrandModal = false;
+selectedBrand: any = null;
+brandCustomerColumns: string[] = ['name', 'totalSpent'];
+brandCustomerDataSource = new MatTableDataSource<any>();
 
 
   constructor(private dataService: DataService) {}
@@ -112,6 +125,8 @@ customEndDate: Date | null = null;
     ]).subscribe(([orders, users]) => {
       this.allOrders = orders;
       this.allUsers = users;
+
+      console.log("All Users:", this.allUsers);
   
       // Now safe to generate retention and metrics
       this.generateCustomerRetentionTrend(this.allUsers, this.allOrders);
@@ -122,6 +137,8 @@ customEndDate: Date | null = null;
       this.generateCategoryChart(orders);
       this.generateTopProductsChart(orders);
       this.generatePeakHoursChart(orders);
+      this.generateBrandMetrics(orders);
+
     });
   
   
@@ -133,7 +150,7 @@ customEndDate: Date | null = null;
   
     // this.dataService.fetchOrdersData().subscribe();
     // this.dataService.fetchOrdersByEmployeesData().subscribe();
-    // this.dataService.fetchUserData().subscribe();
+    this.dataService.fetchUserData().subscribe();
 
     this.chartOptions = {
       responsive: true,
@@ -656,6 +673,103 @@ generateCustomerRetentionTrend(users: any[], orders: any[]) {
 
     this.filterMetricsData(start, end);
     this.filterSalesData(start, end);
+  }
+
+generateBrandMetrics(orders: any[]) {
+  const brandMap: { 
+    [brand: string]: { 
+      totalRevenue: number; 
+      customers: { [userId: string]: number } 
+    } 
+  } = {};
+
+  // Aggregate revenue per brand + customer
+  orders.forEach(order => {
+    order.items?.forEach((item: any) => {
+      const brand = item.brand || 'Unknown';
+      if (!brandMap[brand]) {
+        brandMap[brand] = { totalRevenue: 0, customers: {} };
+      }
+
+      const revenue = item.quantity * item.price;
+      brandMap[brand].totalRevenue += revenue;
+
+      if (!brandMap[brand].customers[order.user_id]) {
+        brandMap[brand].customers[order.user_id] = 0;
+      }
+      brandMap[brand].customers[order.user_id] += revenue;
+    });
+  });
+
+  // Transform into array with user details from this.allUsers
+  this.brandMetrics = Object.entries(brandMap).map(([name, data]) => {
+    const customers = Object.entries(data.customers).map(([userId, totalSpent]) => {
+
+      const user = this.allUsers.find(u => String(u.id) === String(userId));
+
+      return {
+        id: userId,
+        name: user ? `${user.fname} ${user.lname}` : `User ${userId}`,
+        email: user ? user.email : 'No email',
+        totalSpent
+      };
+    });
+
+    return {
+      name,
+      totalRevenue: data.totalRevenue,
+      customerCount: customers.length,
+      customers
+    };
+  }).sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+  // Final debug printout
+  console.log('Final Brand Metrics:', this.brandMetrics);
+}
+
+
+  openBrandCustomersModal(brand: any) {
+    this.selectedBrand = brand;
+    this.brandCustomerDataSource.data = brand.customers;
+    this.showBrandModal = true;
+  }
+
+  exportBrandCustomersToCsv() {
+    if (!this.selectedBrand || !this.selectedBrand.customers) {
+      console.error("No brand or customer data selected for export.");
+      return;
+    }
+
+    const customerData = this.selectedBrand.customers;
+    const brandName = this.selectedBrand.name;
+
+    // 1. Define CSV Headers
+    const headers = ['Customer Name', 'Customer Email', 'Total Spent'];
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    // 2. Format Data Rows
+    customerData.forEach((customer: { name: string; email: string; totalSpent: number }) => {
+      // Escape commas/quotes in name and email fields for correct CSV formatting
+      const name = `"${customer.name.replace(/"/g, '""')}"`;
+      const email = `"${customer.email.replace(/"/g, '""')}"`;
+      const totalSpent = customer.totalSpent.toFixed(2); // Format totalSpent to two decimal places
+
+      csvRows.push([name, email, totalSpent].join(','));
+    });
+
+    // 3. Create the CSV String
+    const csvString = csvRows.join('\n');
+    
+    // 4. Trigger the Download
+    const a = document.createElement('a');
+    a.setAttribute('type', 'hidden');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
+    a.target = '_blank';
+    a.download = `${brandName.replace(/\s/g, '_')}_Customers_Export.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
 }

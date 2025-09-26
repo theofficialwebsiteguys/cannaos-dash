@@ -383,3 +383,119 @@
   height: 40px;
   padding: 0 24px;
 }
+
+/* 🔹 Brand Metrics List */
+.brand-list {
+  width: 100%;
+  margin-top: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-height: 400px; /* scroll if too many brands */
+  overflow-y: auto;
+}
+
+mat-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+mat-list-item:last-child {
+  border-bottom: none;
+}
+
+mat-list-item:hover {
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.brand-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.brand-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.brand-stats {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 🔹 Brand Modal Overlay */
+.brand-modal-overlay {
+  position: fixed; /* fixed so it’s independent of dashboard scroll */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 10000; /* higher than product modal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* 🔹 Modal Container */
+.brand-modal-inner {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 🔹 Scrollable Table Section */
+.brand-modal-table-wrapper {
+  overflow-y: auto;
+  flex-grow: 1;
+  margin: 12px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Sticky header so titles don’t scroll away */
+.brand-modal-table-wrapper th.mat-header-cell {
+  background-color: #f7f7f7;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* 🔹 Table Styling */
+.brand-modal-table-wrapper mat-table {
+  width: 100%;
+  min-width: 500px;
+}
+
+.brand-modal-table-wrapper mat-header-cell,
+.brand-modal-table-wrapper mat-cell {
+  padding: 12px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.brand-modal-table-wrapper mat-cell {
+  border-bottom: 1px solid #eee;
+}
+
+/* 🔹 Close Button */
+.brand-modal-close {
+  align-self: flex-end;
+  margin-top: 10px;
+  font-weight: 600;
+}
