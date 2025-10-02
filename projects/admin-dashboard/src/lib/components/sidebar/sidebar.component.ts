@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
+import { AdminService } from '../../services/admin.service';
 
 @Component({
   selector: 'lib-sidebar',
@@ -16,8 +17,14 @@ export class SidebarComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   isMobile: boolean = false;
 
+  constructor(private adminService: AdminService){}
+
   ngOnInit() {
     this.checkScreenSize();
+  }
+
+  isAdmin(): boolean {
+    return this.adminService.isAdmin();
   }
 
   @HostListener('window:resize', [])

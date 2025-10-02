@@ -3,16 +3,16 @@
     <a [routerLink]="'/'"><img src="assets/logo.png" alt="Logo" /></a>
   </div>
   <mat-nav-list>
-    <mat-list-item routerLink="/dashboard/overview" (click)="linkClick()">
+    <mat-list-item *ngIf="isAdmin()" routerLink="/dashboard/overview" (click)="linkClick()">
       <i class="fa-solid fa-chart-simple"></i> <span class="list-item">Overview</span>
     </mat-list-item>
-    <mat-list-item routerLink="/dashboard/orders" (click)="linkClick()">
+    <mat-list-item *ngIf="isAdmin()" routerLink="/dashboard/orders" (click)="linkClick()">
       <i class="fa-solid fa-cart-shopping"></i> <span class="list-item">Orders</span>
     </mat-list-item>
-    <mat-list-item routerLink="/dashboard/budtender-sales" (click)="linkClick()">
+    <mat-list-item *ngIf="isAdmin()" routerLink="/dashboard/budtender-sales" (click)="linkClick()">
       <i class="fa-solid fa-user-tag"></i> <span class="list-item">Budtender Sales</span>
     </mat-list-item>
-    <mat-list-item routerLink="/dashboard/users" (click)="linkClick()">
+    <mat-list-item *ngIf="isAdmin()" routerLink="/dashboard/users" (click)="linkClick()">
       <i class="fa-solid fa-users"></i> <span class="list-item">Loyalty Members</span>
     </mat-list-item>
     <mat-list-item routerLink="/dashboard/tools" (click)="linkClick()">

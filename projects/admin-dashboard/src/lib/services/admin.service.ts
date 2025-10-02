@@ -9,8 +9,22 @@ import { ConfigService } from './config.service';
   providedIn: 'root'
 })
 export class AdminService {
+  private currentRole: 'admin' | 'employee' | null = null;
 
   constructor(private http: HttpClient, private configService: ConfigService) {}
+
+  setRole(role: 'admin' | 'employee' | null): void {
+    this.currentRole = role;
+  }
+
+  getRole(): 'admin' | 'employee' | null {
+    return this.currentRole;
+  }
+  
+  // Helper for the sidebar
+  isAdmin(): boolean {
+      return this.currentRole === 'admin';
+  }
 
   // private getHeaders(): { [key: string]: string } {
   //   const sessionData = localStorage.getItem('sessionData');
